@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  }
+  
+  body {
+    @apply bg-workshop-50 text-workshop-900 min-h-screen font-workshop;
+    background-image: 
+      radial-gradient(circle at 25px 25px, rgba(98, 125, 152, 0.05) 2px, transparent 0),
+      radial-gradient(circle at 75px 75px, rgba(245, 158, 11, 0.05) 2px, transparent 0);
+    background-size: 100px 100px;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-paint-600 hover:bg-paint-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-paint;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 15px -3px rgba(245, 158, 11, 0.2);
+  }
+  
+  .btn-secondary {
+    @apply bg-brush-100 hover:bg-brush-200 text-brush-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-brush-300;
+    position: relative;
+  }
+  
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px -2px rgba(161, 128, 114, 0.15);
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-workshop border border-workshop-200 p-6 relative;
+    background-image: linear-gradient(135deg, rgba(240, 244, 248, 0.5) 0%, transparent 50%);
+  }
+  
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #f59e0b, #d97706, #b45309);
+    border-radius: 12px 12px 0 0;
+  }
+  
+  .input-field {
+    @apply w-full px-3 py-2 border border-workshop-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paint-500 focus:border-paint-500 bg-white transition-all duration-200;
+  }
+  
+  .textarea-field {
+    @apply w-full px-3 py-2 border border-workshop-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paint-500 focus:border-paint-500 bg-white resize-y transition-all duration-200;
+  }
+  
+  /* Workshop-themed loading spinner */
+  .loading-spinner {
+    @apply animate-spin rounded-full border-b-2 border-paint-600;
+  }
+  
+  /* Paint drop bullet points */
+  .paint-bullet {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+  
+  .paint-bullet::before {
+    content: '🎨';
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
