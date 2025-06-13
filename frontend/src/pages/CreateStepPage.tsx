@@ -386,7 +386,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition-colors md:opacity-0 md:group-hover:opacity-100"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600 transition-colors"
                       >
                         ×
                       </button>

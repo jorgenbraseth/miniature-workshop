@@ -431,7 +431,7 @@ export default function UnitDetailPage({ id }: { id: string }) {
                                     e.stopPropagation();
                                     setThumbnail(photo.id);
                                   }}
-                                  class="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-workshop-500"
+                                  class="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 transition-opacity hover:bg-workshop-500"
                                   title="Set as unit thumbnail"
                                 >
                                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -439,7 +439,7 @@ export default function UnitDetailPage({ id }: { id: string }) {
                                   </svg>
                                 </button>
                               )}
-                              <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                              <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg transition-opacity">
                                 {photo.description}
                               </div>
                             </div>
