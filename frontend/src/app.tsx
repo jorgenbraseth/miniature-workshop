@@ -56,7 +56,7 @@ export function App() {
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="card max-w-md mx-4 text-center">
           <div class="loading-spinner h-12 w-12 mx-auto mb-4"></div>
-                      <h1 class="text-xl font-bold text-workshop-900 mb-2">Initializing pAInt</h1>
+                      <h1 class="text-xl font-bold text-workshop-900 mb-2">Initializing Miniature Workshop</h1>
             <p class="text-workshop-600">Setting up local storage...</p>
         </div>
       </div>

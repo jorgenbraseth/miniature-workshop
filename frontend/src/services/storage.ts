@@ -1,8 +1,8 @@
-// Storage service for pAInt - handles IndexedDB and OPFS operations
+// Storage service for Miniature Workshop - handles IndexedDB and OPFS operations
 
 import { Unit, Step, Photo, SyncQueueItem, StorageStats } from '../types';
 
-const DB_NAME = 'pAIntDB';
+const DB_NAME = 'MiniatureWorkshopDB';
 const DB_VERSION = 1;
 
 // IndexedDB store names

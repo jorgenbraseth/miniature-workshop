@@ -1,4 +1,4 @@
-// Core domain types for pAInt miniature painting app
+// Core domain types for Miniature Workshop app
 
 export interface Paint {
   id: string;

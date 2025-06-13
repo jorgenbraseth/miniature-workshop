@@ -1,7 +1,7 @@
-# pAInt
+# Miniature Workshop
 
 ## Description
-pAInt is a comprehensive tool designed for Warhammer and tabletop miniature painters to document, track, and share their painting processes. The app allows painters to capture their techniques step-by-step with photos and detailed notes, creating a personal reference library and enabling knowledge sharing within the miniature painting community.
+Miniature Workshop is a comprehensive tool designed for Warhammer and tabletop miniature painters to document, track, and share their painting processes. The app allows painters to capture their techniques step-by-step with photos and detailed notes, creating a personal reference library and enabling knowledge sharing within the miniature painting community.
 
 ## Features
 - **Photo Documentation**: Capture high-quality images of your miniatures at each stage of the painting process
@@ -25,10 +25,10 @@ pAInt is a comprehensive tool designed for Warhammer and tabletop miniature pain
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/pAInt.git
+git clone https://github.com/yourusername/miniature-workshop.git
 
 # Navigate to project directory
-cd pAInt
+cd miniature-workshop
 
 # Install dependencies
 npm install
@@ -100,7 +100,7 @@ Each painting step captures comprehensive information for future reference:
 ## Technical Architecture
 
 ### Overview
-pAInt is built as a Progressive Web App (PWA) with offline-first capabilities, ensuring seamless use across mobile and desktop devices.
+Miniature Workshop is built as a Progressive Web App (PWA) with offline-first capabilities, ensuring seamless use across mobile and desktop devices.
 
 ### Frontend Stack
 - **Language**: TypeScript for type safety and better development experience

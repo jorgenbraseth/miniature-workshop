@@ -20,8 +20,8 @@ export default function Header() {
                 <span class="text-white font-bold text-xl">🎨</span>
               </div>
               <div class="flex flex-col">
-                <span class="text-xl font-bold text-workshop-900 group-hover:text-paint-600 transition-colors duration-200">pAInt</span>
-                <span class="text-xs text-workshop-600 -mt-1">Miniature Workshop</span>
+                <span class="text-xl font-bold text-workshop-900 group-hover:text-paint-600 transition-colors duration-200">Miniature Workshop</span>
+                <span class="text-xs text-workshop-600 -mt-1">Paint Documentation</span>
               </div>
             </div>
           </div>
