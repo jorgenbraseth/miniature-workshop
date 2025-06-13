@@ -173,8 +173,8 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
       allTechniques.push(techniqueInput.trim());
     }
 
-    if (!unit || allTechniques.length === 0) {
-      setError('Please enter at least one painting technique');
+    if (!unit || !description.trim()) {
+      setError('Please enter a description for this step');
       return;
     }
 
@@ -201,7 +201,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
         id: `step-${Date.now()}`,
         stepNumber: unit.steps.length + 1,
         technique: allTechniques,
-        description: description.trim() || '', // Optional description
+        description: description.trim(),
         timestamp: new Date(),
         paints: [], // Will be parsed from paintsUsed text later if needed
         brushes: [], // Will be parsed from toolsUsed text later if needed
@@ -277,117 +277,6 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
       </div>
 
       <form onSubmit={handleSubmit} class="space-y-8" action="javascript:void(0)">
-        {/* Basic Information */}
-        <div class="card">
-          <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
-            <span class="mr-2">📝</span>
-            Step Information
-          </h2>
-          
-          {/* Techniques */}
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Painting Technique *
-            </label>
-            <div class="flex gap-2 mb-2">
-              <input
-                type="text"
-                value={techniqueInput}
-                onInput={(e) => setTechniqueInput((e.target as HTMLInputElement).value)}
-                placeholder="e.g., Base coating, Layering, Drybrushing"
-                class="input-field flex-1"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnique())}
-              />
-              <button
-                type="button"
-                onClick={addTechnique}
-                class="btn-secondary"
-              >
-                Add More
-              </button>
-            </div>
-            <p class="text-sm text-workshop-500 mb-2">
-              Enter your main technique above. Click "Add More" to include additional techniques.
-            </p>
-            <div class="flex flex-wrap gap-2">
-              {technique.map((tech, index) => (
-                <span key={index} class="inline-flex items-center px-3 py-1 bg-paint-100 text-paint-800 rounded-full text-sm">
-                  {tech}
-                  <button
-                    type="button"
-                    onClick={() => removeTechnique(index)}
-                    class="ml-2 text-paint-600 hover:text-paint-800"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Description */}
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
-              placeholder="Describe what you did in this step (optional)..."
-              rows={4}
-              class="textarea-field"
-            />
-          </div>
-        </div>
-
-        {/* Paints */}
-        <div class="card">
-          <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
-            <span class="mr-2">🎨</span>
-            Paints Used
-          </h2>
-          
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Paint Colors & Brands
-            </label>
-            <textarea
-              value={paintsUsed}
-              onInput={(e) => setPaintsUsed((e.target as HTMLTextAreaElement).value)}
-              placeholder="e.g., Citadel Abaddon Black, Vallejo Model Color White, Army Painter Dragon Red..."
-              rows={3}
-              class="textarea-field"
-            />
-            <p class="text-sm text-workshop-500 mt-1">
-              List the paints you used for this step
-            </p>
-          </div>
-        </div>
-
-        {/* Tools */}
-        <div class="card">
-          <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
-            <span class="mr-2">🔧</span>
-            Tools Used
-          </h2>
-          
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Brushes & Tools
-            </label>
-            <textarea
-              value={toolsUsed}
-              onInput={(e) => setToolsUsed((e.target as HTMLTextAreaElement).value)}
-              placeholder="e.g., Round brush size 2, Flat brush size 6, Sponge, Cotton swabs..."
-              rows={3}
-              class="textarea-field"
-            />
-            <p class="text-sm text-workshop-500 mt-1">
-              List the brushes and tools you used for this step
-            </p>
-          </div>
-        </div>
-
         {/* Photos */}
         <div class="card">
           <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
@@ -516,6 +405,99 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
           </div>
         </div>
 
+        {/* Step Details */}
+        <div class="card">
+          <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
+            <span class="mr-2">📝</span>
+            Step Details
+          </h2>
+          
+          {/* Description */}
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-workshop-700 mb-2">
+              Description *
+            </label>
+            <textarea
+              value={description}
+              onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+              placeholder="Describe what you did in this step..."
+              rows={3}
+              class="textarea-field"
+            />
+          </div>
+
+          {/* Paints */}
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-workshop-700 mb-2">
+              <span class="mr-1">🎨</span>
+              Paint Colors & Brands
+            </label>
+            <textarea
+              value={paintsUsed}
+              onInput={(e) => setPaintsUsed((e.target as HTMLTextAreaElement).value)}
+              placeholder="e.g., Citadel Abaddon Black, Vallejo Model Color White, Army Painter Dragon Red..."
+              rows={2}
+              class="textarea-field"
+            />
+          </div>
+
+          {/* Tools */}
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-workshop-700 mb-2">
+              <span class="mr-1">🔧</span>
+              Brushes & Tools
+            </label>
+            <textarea
+              value={toolsUsed}
+              onInput={(e) => setToolsUsed((e.target as HTMLTextAreaElement).value)}
+              placeholder="e.g., Round brush size 2, Flat brush size 6, Sponge, Cotton swabs..."
+              rows={2}
+              class="textarea-field"
+            />
+          </div>
+
+          {/* Techniques */}
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-workshop-700 mb-2">
+              Painting Technique
+            </label>
+            <div class="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={techniqueInput}
+                onInput={(e) => setTechniqueInput((e.target as HTMLInputElement).value)}
+                placeholder="e.g., Base coating, Layering, Drybrushing"
+                class="input-field flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnique())}
+              />
+              <button
+                type="button"
+                onClick={addTechnique}
+                class="btn-secondary"
+              >
+                Add More
+              </button>
+            </div>
+            <p class="text-sm text-workshop-500 mb-2">
+              Enter your main technique above. Click "Add More" to include additional techniques (optional).
+            </p>
+            <div class="flex flex-wrap gap-2">
+              {technique.map((tech, index) => (
+                <span key={index} class="inline-flex items-center px-3 py-1 bg-paint-100 text-paint-800 rounded-full text-sm">
+                  {tech}
+                  <button
+                    type="button"
+                    onClick={() => removeTechnique(index)}
+                    class="ml-2 text-paint-600 hover:text-paint-800"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Error Display */}
         {error && (
           <div class="card border-red-200 bg-red-50">
@@ -536,7 +518,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
           <button
             type="submit"
             class="btn-primary"
-            disabled={saving || (technique.length === 0 && !techniqueInput.trim())}
+            disabled={saving || !description.trim()}
           >
             {saving ? 'Saving...' : 'Save Step'}
           </button>
