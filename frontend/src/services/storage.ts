@@ -171,7 +171,8 @@ class StorageService {
     return {
       ...unit,
       isComplete: unit.isComplete ?? false, // Default to false if not present
-      modelCount: unit.modelCount ?? (unit.models ? unit.models.length : 1) // Migrate from models array or default to 1
+      modelCount: unit.modelCount ?? (unit.models ? unit.models.length : 1), // Migrate from models array or default to 1
+      thumbnailPhotoId: unit.thumbnailPhotoId ?? undefined // Ensure thumbnailPhotoId field exists
     };
   }
 

@@ -89,6 +89,9 @@ export interface Unit {
   // Completion status
   isComplete: boolean;
   
+  // Thumbnail image
+  thumbnailPhotoId?: string; // ID of the photo to use as thumbnail
+  
   // Metadata
   createdAt: Date;
   updatedAt: Date;

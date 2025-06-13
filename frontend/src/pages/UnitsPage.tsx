@@ -66,36 +66,72 @@ export default function UnitsPage() {
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {units.map((unit) => (
-          <div 
-            key={unit.id} 
-            onClick={() => route(`/units/${unit.id}`)}
-            class="card hover:shadow-paint transition-all duration-300 cursor-pointer group hover:-translate-y-1"
-          >
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex items-center gap-2 flex-1 min-w-0">
-                <h3 class="text-lg font-semibold text-workshop-900 truncate group-hover:text-paint-600 transition-colors">
-                  {unit.name}
-                </h3>
-                <span class={`px-2 py-1 text-xs rounded-full font-medium ${
-                  unit.isComplete 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 text-gray-600'
-                }`}>
-                  {unit.isComplete ? '✅' : '⏳'}
-                </span>
-              </div>
-              <span class={`px-2 py-1 text-xs rounded-full ${
-                unit.syncStatus === 'synced' ? 'bg-success-100 text-success-800' :
-                unit.syncStatus === 'syncing' ? 'bg-warning-100 text-warning-800' :
-                unit.syncStatus === 'conflict' ? 'bg-error-100 text-error-800' :
-                'bg-workshop-100 text-workshop-800'
-              }`}>
-                {unit.syncStatus}
-              </span>
-            </div>
-            
-            <p class="text-workshop-600 text-sm mb-3 line-clamp-2">{unit.description}</p>
+        {units.map((unit) => {
+          // Find thumbnail photo
+          const allPhotos = unit.steps.flatMap(step => step.photos);
+          const thumbnailPhoto = allPhotos.find(photo => photo.id === unit.thumbnailPhotoId);
+          
+          return (
+            <div 
+              key={unit.id} 
+              onClick={() => route(`/units/${unit.id}`)}
+              class="card hover:shadow-paint transition-all duration-300 cursor-pointer group hover:-translate-y-1 overflow-hidden"
+            >
+              {/* Thumbnail Image */}
+              {thumbnailPhoto ? (
+                <div class="relative h-48 mb-4 -mx-6 -mt-6">
+                  <img
+                    src={thumbnailPhoto.opfsPath}
+                    alt={`${unit.name} thumbnail`}
+                    class="w-full h-full object-cover"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div class="absolute top-3 right-3 flex items-center gap-2">
+                    <span class={`px-2 py-1 text-xs rounded-full font-medium backdrop-blur-sm ${
+                      unit.isComplete 
+                        ? 'bg-green-100/90 text-green-800' 
+                        : 'bg-gray-100/90 text-gray-600'
+                    }`}>
+                      {unit.isComplete ? '✅' : '⏳'}
+                    </span>
+                    <span class={`px-2 py-1 text-xs rounded-full backdrop-blur-sm ${
+                      unit.syncStatus === 'synced' ? 'bg-success-100/90 text-success-800' :
+                      unit.syncStatus === 'syncing' ? 'bg-warning-100/90 text-warning-800' :
+                      unit.syncStatus === 'conflict' ? 'bg-error-100/90 text-error-800' :
+                      'bg-workshop-100/90 text-workshop-800'
+                    }`}>
+                      {unit.syncStatus}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div class="flex justify-between items-start mb-3">
+                  <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <span class={`px-2 py-1 text-xs rounded-full font-medium ${
+                      unit.isComplete 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      {unit.isComplete ? '✅' : '⏳'}
+                    </span>
+                  </div>
+                  <span class={`px-2 py-1 text-xs rounded-full ${
+                    unit.syncStatus === 'synced' ? 'bg-success-100 text-success-800' :
+                    unit.syncStatus === 'syncing' ? 'bg-warning-100 text-warning-800' :
+                    unit.syncStatus === 'conflict' ? 'bg-error-100 text-error-800' :
+                    'bg-workshop-100 text-workshop-800'
+                  }`}>
+                    {unit.syncStatus}
+                  </span>
+                </div>
+              )}
+              
+              {/* Unit Title */}
+              <h3 class="text-lg font-semibold text-workshop-900 truncate group-hover:text-paint-600 transition-colors mb-2">
+                {unit.name}
+              </h3>
+              
+              <p class="text-workshop-600 text-sm mb-3 line-clamp-2">{unit.description}</p>
             
             <div class="flex justify-between items-center text-sm text-workshop-500 mb-3">
               <span class="flex items-center space-x-1">
@@ -118,7 +154,8 @@ export default function UnitsPage() {
               </span>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

@@ -83,6 +83,42 @@ export default function UnitDetailPage({ id }: { id: string }) {
     }
   };
 
+  const setThumbnail = async (photoId: string) => {
+    if (!unit) return;
+    
+    try {
+      const updatedUnit: Unit = {
+        ...unit,
+        thumbnailPhotoId: photoId,
+        updatedAt: new Date()
+      };
+      
+      await storageService.saveUnit(updatedUnit);
+      setUnit(updatedUnit);
+    } catch (err) {
+      console.error('Failed to set thumbnail:', err);
+      setError('Failed to set thumbnail. Please try again.');
+    }
+  };
+
+  const removeThumbnail = async () => {
+    if (!unit) return;
+    
+    try {
+      const updatedUnit: Unit = {
+        ...unit,
+        thumbnailPhotoId: undefined,
+        updatedAt: new Date()
+      };
+      
+      await storageService.saveUnit(updatedUnit);
+      setUnit(updatedUnit);
+    } catch (err) {
+      console.error('Failed to remove thumbnail:', err);
+      setError('Failed to remove thumbnail. Please try again.');
+    }
+  };
+
   if (loading) {
     return (
       <div class="flex justify-center items-center min-h-64">
@@ -199,6 +235,74 @@ export default function UnitDetailPage({ id }: { id: string }) {
               </div>
             )}
 
+            {/* Thumbnail Section */}
+            {(() => {
+              const allPhotos = unit.steps.flatMap(step => step.photos);
+              const currentThumbnail = allPhotos.find(photo => photo.id === unit.thumbnailPhotoId);
+              
+              return (
+                <div class="mb-4">
+                  <h3 class="font-medium text-gray-700 mb-2">Unit Thumbnail</h3>
+                  {currentThumbnail ? (
+                    <div class="mb-3">
+                      <div class="relative inline-block">
+                        <img
+                          src={currentThumbnail.opfsPath}
+                          alt="Unit thumbnail"
+                          class="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                        />
+                        <button
+                          onClick={removeThumbnail}
+                          class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                          title="Remove thumbnail"
+                        >
+                          ×
+                        </button>
+                      </div>
+                      <p class="text-xs text-gray-500 mt-1">Current thumbnail</p>
+                    </div>
+                  ) : (
+                    <p class="text-gray-500 text-sm mb-3">No thumbnail selected</p>
+                  )}
+                  
+                  {allPhotos.length > 0 && (
+                    <details class="group">
+                      <summary class="cursor-pointer text-sm text-workshop-600 hover:text-workshop-800 font-medium">
+                        {currentThumbnail ? 'Change thumbnail' : 'Choose thumbnail'} ({allPhotos.length} photos)
+                      </summary>
+                      <div class="mt-2 grid grid-cols-3 gap-2 max-h-32 overflow-y-auto">
+                        {allPhotos.map((photo) => (
+                          <button
+                            key={photo.id}
+                            onClick={() => setThumbnail(photo.id)}
+                            class={`relative group/thumb ${
+                              photo.id === unit.thumbnailPhotoId 
+                                ? 'ring-2 ring-workshop-500' 
+                                : 'hover:ring-2 hover:ring-workshop-300'
+                            }`}
+                            title={`Set as thumbnail: ${photo.description}`}
+                          >
+                            <img
+                              src={photo.opfsPath}
+                              alt={photo.description}
+                              class="w-full h-16 object-cover rounded border"
+                            />
+                            {photo.id === unit.thumbnailPhotoId && (
+                              <div class="absolute inset-0 bg-workshop-500 bg-opacity-20 rounded flex items-center justify-center">
+                                <svg class="w-4 h-4 text-workshop-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+                </div>
+              );
+            })()}
+
             <div class="text-sm text-gray-500">
               <p>Created: {new Date(unit.createdAt).toLocaleDateString()}</p>
               <p>Updated: {new Date(unit.updatedAt).toLocaleDateString()}</p>
@@ -294,10 +398,50 @@ export default function UnitDetailPage({ id }: { id: string }) {
                         <h4 class="font-medium text-gray-700 mb-2">Photos ({step.photos.length}):</h4>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                           {step.photos.map((photo) => (
-                            <div key={photo.id} class="aspect-square bg-gray-100 rounded border-2 border-dashed border-gray-300 flex items-center justify-center">
-                              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
+                            <div key={photo.id} class="relative group">
+                              <img
+                                src={photo.opfsPath}
+                                alt={photo.description}
+                                class="w-full h-24 object-cover rounded-lg border border-gray-200 hover:border-workshop-400 transition-colors cursor-pointer"
+                                onClick={() => {
+                                  // Create a modal or lightbox view
+                                  const modal = document.createElement('div');
+                                  modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
+                                  modal.onclick = () => modal.remove();
+                                  
+                                  const img = document.createElement('img');
+                                  img.src = photo.opfsPath;
+                                  img.className = 'max-w-full max-h-full object-contain';
+                                  img.alt = photo.description;
+                                  
+                                  modal.appendChild(img);
+                                  document.body.appendChild(modal);
+                                }}
+                              />
+                              {/* Thumbnail indicator and set button */}
+                              {photo.id === unit.thumbnailPhotoId ? (
+                                <div class="absolute top-1 right-1 bg-workshop-500 text-white rounded-full p-1" title="Unit thumbnail">
+                                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                  </svg>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setThumbnail(photo.id);
+                                  }}
+                                  class="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-workshop-500"
+                                  title="Set as unit thumbnail"
+                                >
+                                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                  </svg>
+                                </button>
+                              )}
+                              <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 rounded-b-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                {photo.description}
+                              </div>
                             </div>
                           ))}
                         </div>
