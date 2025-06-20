@@ -71,6 +71,16 @@ provider:
 
 package:
   individually: true
+  patterns:
+    - '!node_modules/**'
+    - '!.git/**'
+    - '!.serverless/**'
+    - '!coverage/**'
+    - '!**/*.test.ts'
+    - '!**/*.spec.ts'
+    - '!README.md'
+    - '!tsconfig.json'
+    - 'dist/**'
 
 plugins:
   - serverless-plugin-typescript

@@ -92,6 +92,7 @@ jobs:
           echo "API_URL=$(serverless info --stage prod | grep 'HttpApiUrl' | awk '{print $2}')" >> $GITHUB_OUTPUT
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          NODE_OPTIONS: '--max-old-space-size=4096'
         id: deploy
 
       - name: Display API URL

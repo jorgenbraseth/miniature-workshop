@@ -4,8 +4,8 @@
   "description": "Backend API for Miniature Workshop - A miniature painting documentation app",
   "main": "handler.js",
   "scripts": {
-    "build": "tsc",
-    "deploy": "serverless deploy --stage prod",
+    "build": "node --max-old-space-size=4096 node_modules/.bin/tsc",
+    "deploy": "node --max-old-space-size=4096 node_modules/.bin/serverless deploy --stage prod",
     "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "offline": "serverless offline"
