@@ -2,6 +2,8 @@ service: miniature-workshop-backend
 
 frameworkVersion: '3'
 
+
+
 provider:
   name: aws
   runtime: nodejs18.x
@@ -9,6 +11,7 @@ provider:
   region: ${opt:region, 'eu-west-1'}
   memorySize: 256
   timeout: 25
+  disableDefaultOutputExportNames: true
   environment:
     STAGE: ${self:provider.stage}
     REGION: ${self:provider.region}
@@ -16,7 +19,7 @@ provider:
     USERS_TABLE: ${self:service}-prod-users
     SYNC_QUEUE_TABLE: ${self:service}-prod-sync-queue
     IMAGES_BUCKET: ${self:service}-prod-images
-    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID, 'not-set'}
   httpApi:
     cors:
       allowedOrigins:
@@ -68,6 +71,16 @@ provider:
             - s3:ListBucket
           Resource:
             - Fn::GetAtt: [ImagesBucket, Arn]
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:TagResource
+            - logs:UntagResource
+          Resource:
+            - Fn::Sub: 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
+
 
 package:
   individually: true
