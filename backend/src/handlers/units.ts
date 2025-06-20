@@ -107,7 +107,7 @@ export const createUnit: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(unit, 'Unit created successfully', 201);
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error creating unit:', error);
@@ -147,7 +147,7 @@ export const updateUnit: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(updatedUnit, 'Unit updated successfully');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error updating unit:', error);
@@ -179,7 +179,7 @@ export const deleteUnit: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(null, 'Unit deleted successfully');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error deleting unit:', error);

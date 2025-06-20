@@ -41,7 +41,7 @@ export const syncData: APIGatewayProxyHandler = async (event) => {
       } catch (error) {
         failed.push({
           item,
-          error: error.message || 'Unknown error',
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }
@@ -53,7 +53,7 @@ export const syncData: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(response, 'Sync completed');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error syncing data:', error);
@@ -80,7 +80,7 @@ export const getSyncStatus: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(syncStatus, 'Sync status retrieved');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error getting sync status:', error);

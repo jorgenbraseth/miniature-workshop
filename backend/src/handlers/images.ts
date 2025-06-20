@@ -62,7 +62,7 @@ export const getUploadUrl: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(response, 'Upload URL generated successfully');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error generating upload URL:', error);
@@ -84,7 +84,7 @@ export const uploadImage: APIGatewayProxyHandler = async (event) => {
       'Direct upload not implemented'
     );
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error uploading image:', error);

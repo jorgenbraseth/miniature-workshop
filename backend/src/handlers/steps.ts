@@ -70,7 +70,7 @@ export const createStep: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(newStep, 'Step created successfully', 201);
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error creating step:', error);
@@ -126,7 +126,7 @@ export const updateStep: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(updatedSteps[stepIndex], 'Step updated successfully');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error updating step:', error);
@@ -167,7 +167,7 @@ export const deleteStep: APIGatewayProxyHandler = async (event) => {
 
     return successResponse(null, 'Step deleted successfully');
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error deleting step:', error);

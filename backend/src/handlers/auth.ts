@@ -71,7 +71,7 @@ const getCurrentUser = async (event: any) => {
 
     return successResponse(user);
   } catch (error) {
-    if (error.message === 'Authentication required') {
+    if (error instanceof Error && error.message === 'Authentication required') {
       return unauthorizedResponse();
     }
     console.error('Error getting current user:', error);
