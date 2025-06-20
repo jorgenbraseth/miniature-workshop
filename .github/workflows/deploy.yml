@@ -17,8 +17,31 @@ env:
   NODE_VERSION: '18.x'
 
 jobs:
+  # Detect changes in different parts of the codebase
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Check for changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+              - '.github/workflows/deploy.yml'
+            frontend:
+              - 'frontend/**'
+              - '.github/workflows/deploy.yml'
+
   test:
     runs-on: ubuntu-latest
+    needs: changes
     
     steps:
       - name: Checkout code
@@ -35,31 +58,36 @@ jobs:
           version: 9.15.0
 
       - name: Install frontend dependencies
+        if: needs.changes.outputs.frontend == 'true'
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
       - name: Install backend dependencies
+        if: needs.changes.outputs.backend == 'true'
         working-directory: ./backend
         run: pnpm install --frozen-lockfile
 
       - name: Lint frontend
+        if: needs.changes.outputs.frontend == 'true'
         working-directory: ./frontend
         run: pnpm run lint
 
       - name: Build frontend
+        if: needs.changes.outputs.frontend == 'true'
         working-directory: ./frontend
         run: pnpm run build
 
       - name: Test backend
+        if: needs.changes.outputs.backend == 'true'
         working-directory: ./backend
         run: pnpm run test
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
   deploy-backend:
-    needs: test
+    needs: [changes, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.backend == 'true'
     outputs:
       API_URL: ${{ steps.deploy.outputs.API_URL }}
     
@@ -104,10 +132,37 @@ jobs:
       - name: Display API URL
         run: echo "🚀 API deployed at ${{ steps.deploy.outputs.API_URL }}"
 
-  deploy-frontend:
-    needs: [test, deploy-backend]
+  # Get current API URL if backend wasn't deployed
+  get-api-url:
+    needs: [changes, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true' && needs.changes.outputs.backend == 'false'
+    outputs:
+      API_URL: ${{ steps.get-url.outputs.API_URL }}
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Get existing API URL
+        id: get-url
+        run: |
+          API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`HttpApiUrl`].OutputValue' --output text --region eu-west-1 2>/dev/null || echo "")
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
+
+  deploy-frontend:
+    needs: [changes, test, deploy-backend, get-api-url]
+    runs-on: ubuntu-latest
+    if: |
+      always() && 
+      github.ref == 'refs/heads/main' && 
+      needs.changes.outputs.frontend == 'true' &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped') &&
+      (needs.get-api-url.result == 'success' || needs.get-api-url.result == 'skipped')
     
     steps:
       - name: Checkout code
@@ -131,7 +186,7 @@ jobs:
         working-directory: ./frontend
         run: pnpm run build
         env:
-          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL }}
+          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
       - name: Deploy to Vercel
@@ -143,4 +198,39 @@ jobs:
           working-directory: ./frontend
           vercel-args: '--prod'
           alias-domains: |
-            miniature-workshop.vercel.app 
+            miniature-workshop.vercel.app
+
+  # Summary job to show what was deployed
+  deployment-summary:
+    needs: [changes, deploy-backend, deploy-frontend]
+    runs-on: ubuntu-latest
+    if: always() && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Deployment Summary
+        run: |
+          echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.changes.outputs.backend }}" == "true" ]]; then
+            if [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
+              echo "✅ **Backend**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Backend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⏭️ **Backend**: No changes detected, skipped deployment" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.changes.outputs.frontend }}" == "true" ]]; then
+            if [[ "${{ needs.deploy-frontend.result }}" == "success" ]]; then
+              echo "✅ **Frontend**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ **Frontend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "⏭️ **Frontend**: No changes detected, skipped deployment" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🌐 **Live App**: https://miniature-workshop.vercel.app" >> $GITHUB_STEP_SUMMARY 
