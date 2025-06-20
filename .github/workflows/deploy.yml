@@ -230,10 +230,14 @@ jobs:
       always() && 
       github.ref == 'refs/heads/main' && 
       (
-        (github.event_name != 'workflow_dispatch' && needs.changes.outputs.frontend == 'true') ||
+        (github.event_name != 'workflow_dispatch' && (
+          needs.changes.outputs.frontend == 'true' || 
+          needs.deploy-backend.result == 'success'
+        )) ||
         (github.event_name == 'workflow_dispatch' && (
           inputs.deploy_frontend == 'true' || 
-          (inputs.deploy_frontend == 'auto' && needs.changes.outputs.frontend == 'true')
+          (inputs.deploy_frontend == 'auto' && needs.changes.outputs.frontend == 'true') ||
+          needs.deploy-backend.result == 'success'
         ))
       ) &&
       (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped') &&
@@ -340,25 +344,30 @@ jobs:
           echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           
-          if [[ "${{ needs.changes.outputs.backend }}" == "true" ]]; then
-            if [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
-              echo "✅ **Backend**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "❌ **Backend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
-            fi
+          if [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
+            echo "✅ **Backend**: Deployed successfully (new API URL generated)" >> $GITHUB_STEP_SUMMARY
+          elif [[ "${{ needs.changes.outputs.backend }}" == "true" ]]; then
+            echo "❌ **Backend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
           else
             echo "⏭️ **Backend**: No changes detected, skipped deployment" >> $GITHUB_STEP_SUMMARY
           fi
           
-          if [[ "${{ needs.changes.outputs.frontend }}" == "true" ]]; then
-            if [[ "${{ needs.deploy-frontend.result }}" == "success" ]]; then
-              echo "✅ **Frontend**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ needs.deploy-frontend.result }}" == "success" ]]; then
+            if [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
+              echo "✅ **Frontend**: Deployed successfully (updated with new API URL)" >> $GITHUB_STEP_SUMMARY
             else
-              echo "❌ **Frontend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
+              echo "✅ **Frontend**: Deployed successfully" >> $GITHUB_STEP_SUMMARY
             fi
+          elif [[ "${{ needs.changes.outputs.frontend }}" == "true" ]] || [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
+            echo "❌ **Frontend**: Deployment failed" >> $GITHUB_STEP_SUMMARY
           else
             echo "⏭️ **Frontend**: No changes detected, skipped deployment" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "🌐 **Live App**: https://miniature-workshop.vercel.app" >> $GITHUB_STEP_SUMMARY 
+          echo "🌐 **Live App**: https://miniature-workshop.vercel.app" >> $GITHUB_STEP_SUMMARY
+          
+          if [[ "${{ needs.deploy-backend.result }}" == "success" ]]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "ℹ️ **Note**: Backend deployment generated new API URL, frontend was automatically redeployed" >> $GITHUB_STEP_SUMMARY
+          fi 
