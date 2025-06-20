@@ -2,8 +2,6 @@ service: miniature-workshop-backend
 
 frameworkVersion: '3'
 
-
-
 provider:
   name: aws
   runtime: nodejs18.x
@@ -70,7 +68,6 @@ provider:
             - s3:ListBucket
           Resource:
             - Fn::GetAtt: [ImagesBucket, Arn]
-
 
 package:
   individually: true
