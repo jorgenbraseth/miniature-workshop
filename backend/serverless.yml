@@ -72,20 +72,23 @@ provider:
 
 package:
   individually: true
-  patterns:
-    - '!node_modules/**'
-    - '!.git/**'
-    - '!.serverless/**'
-    - '!coverage/**'
-    - '!**/*.test.ts'
-    - '!**/*.spec.ts'
-    - '!README.md'
-    - '!tsconfig.json'
-    - 'dist/**'
 
 plugins:
-  - serverless-plugin-typescript
+  - serverless-esbuild
   - serverless-offline
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    exclude: 
+      - 'aws-sdk'
+    target: 'node18'
+    define:
+      'require.resolve': undefined
+    platform: 'node'
+    concurrency: 10
 
 functions:
   # Authentication
