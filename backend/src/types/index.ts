@@ -214,14 +214,13 @@ export interface GoogleTokenPayload {
 }
 
 // Database item types (for DynamoDB)
-export interface UnitDynamoItem extends Omit<Unit, 'createdAt' | 'updatedAt' | 'lastSyncAt'> {
+export interface UnitDynamoItem extends Omit<Unit, 'createdAt' | 'updatedAt' | 'lastSyncAt' | 'isPublic'> {
   createdAt: string;
   updatedAt: string;
   lastSyncAt?: string;
+  isPublic: string; // Converted to string for PublicIndex
   GSI1PK: string; // userId for UserIndex
   GSI1SK: string; // createdAt for UserIndex
-  GSI2PK: string; // isPublic for PublicIndex
-  GSI2SK: string; // createdAt for PublicIndex
 }
 
 export interface UserDynamoItem extends Omit<User, 'createdAt' | 'updatedAt'> {

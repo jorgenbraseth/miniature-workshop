@@ -311,16 +311,20 @@ export const createUser = async (user: Omit<User, 'createdAt' | 'updatedAt'>): P
 const transformUnitToDynamoItem = (unit: Unit): UnitDynamoItem => {
   return {
     ...unit,
+    // Convert boolean to string for the isPublic field to match the existing index
+    isPublic: unit.isPublic.toString(),
     GSI1PK: unit.userId,
     GSI1SK: unit.createdAt,
-    GSI2PK: unit.isPublic.toString(),
-    GSI2SK: unit.createdAt,
   };
 };
 
 const transformDynamoItemToUnit = (item: UnitDynamoItem): Unit => {
-  const { GSI1PK, GSI1SK, GSI2PK, GSI2SK, ...unit } = item;
-  return unit;
+  const { GSI1PK, GSI1SK, ...unitWithStringIsPublic } = item;
+  return {
+    ...unitWithStringIsPublic,
+    // Convert string back to boolean for the API response
+    isPublic: unitWithStringIsPublic.isPublic === 'true',
+  };
 };
 
 const transformUserToDynamoItem = (user: User): UserDynamoItem => {
