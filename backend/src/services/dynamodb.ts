@@ -219,7 +219,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
     const result = await docClient.send(
       new QueryCommand({
         TableName: USERS_TABLE,
-        IndexName: 'EmailIndex',
+        IndexName: 'EmailIndexV2',
         KeyConditionExpression: 'GSI1PK = :email',
         ExpressionAttributeValues: {
           ':email': email,

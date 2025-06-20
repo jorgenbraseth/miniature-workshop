@@ -32,6 +32,11 @@ provider:
         - PUT
         - DELETE
         - OPTIONS
+    # Uncomment and configure for custom domain
+    # domain:
+    #   domainName: api.miniature-workshop.com
+    #   certificateArn: ${env:CERTIFICATE_ARN}
+    #   createRoute53Record: true
   iam:
     role:
       statements:
@@ -49,6 +54,7 @@ provider:
             - !GetAtt SyncQueueTable.Arn
             - !Sub "${UnitsTable.Arn}/index/*"
             - !Sub "${UsersTable.Arn}/index/EmailIndex"
+            - !Sub "${UsersTable.Arn}/index/EmailIndexV2"
             - !Sub "${UsersTable.Arn}/index/*"
             - !Sub "${SyncQueueTable.Arn}/index/*"
         - Effect: Allow
@@ -258,6 +264,8 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
+          - AttributeName: email
+            AttributeType: S
           - AttributeName: GSI1PK
             AttributeType: S
         KeySchema:
@@ -265,6 +273,12 @@ resources:
             KeyType: HASH
         GlobalSecondaryIndexes:
           - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: EmailIndexV2
             KeySchema:
               - AttributeName: GSI1PK
                 KeyType: HASH
@@ -325,4 +339,11 @@ resources:
   Outputs:
     ApiEndpoint:
       Value:
-        Fn::Sub: "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com" 
+        Fn::Sub: "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+      Export:
+        Name: ${self:service}-${self:provider.stage}-api-url
+    
+    HttpApiId:
+      Value: !Ref HttpApi
+      Export:
+        Name: ${self:service}-${self:provider.stage}-http-api-id 
