@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'preact/hooks';
+import { ComponentChildren } from 'preact';
 import { authService, AuthState } from '../services/auth';
 import LoginButton from './LoginButton';
 
 interface AuthGuardProps {
-  children: any;
-  fallback?: any;
+  children: ComponentChildren;
+  fallback?: ComponentChildren;
 }
 
 export default function AuthGuard({ children, fallback }: AuthGuardProps) {
@@ -19,7 +20,7 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
     return (
       <div class="flex items-center justify-center min-h-64">
         <div class="text-center">
-          <div class="loading-spinner h-8 w-8 mx-auto mb-4"></div>
+          <div class="loading-spinner h-8 w-8 mx-auto mb-4" />
           <p class="text-workshop-600">Checking authentication...</p>
         </div>
       </div>

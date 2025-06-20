@@ -1,6 +1,6 @@
 // Storage service for Miniature Workshop - handles IndexedDB and OPFS operations
 
-import { Unit, Step, Photo, SyncQueueItem, StorageStats } from '../types';
+import { Unit, Photo, SyncQueueItem, StorageStats } from '../types';
 
 const DB_NAME = 'MiniatureWorkshopDB';
 const DB_VERSION = 1;

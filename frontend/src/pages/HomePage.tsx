@@ -10,7 +10,7 @@ import SyncStatusComponent from '../components/SyncStatus';
 export default function HomePage() {
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
+  const [, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
 
   useEffect(() => {
     loadStats();
@@ -38,7 +38,7 @@ export default function HomePage() {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   return (

@@ -1,7 +1,10 @@
 import { Router, Route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
 import { storageService } from './services/storage';
+// Import services to initialize them (they auto-initialize in constructors)
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { authService } from './services/auth';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { syncService } from './services/sync';
 
 // Components (we'll create these next)
@@ -58,8 +61,8 @@ export function App() {
     return (
       <div class="min-h-screen bg-gray-50 flex items-center justify-center">
         <div class="card max-w-md mx-4 text-center">
-          <div class="loading-spinner h-12 w-12 mx-auto mb-4"></div>
-                      <h1 class="text-xl font-bold text-workshop-900 mb-2">Initializing Miniature Workshop</h1>
+          <div class="loading-spinner h-12 w-12 mx-auto mb-4" />
+          <h1 class="text-xl font-bold text-workshop-900 mb-2">Initializing Miniature Workshop</h1>
             <p class="text-workshop-600">Setting up local storage...</p>
         </div>
       </div>

@@ -84,7 +84,7 @@ export default function EditUnitPage({ id }: { id: string }) {
   if (loading) {
     return (
       <div class="flex justify-center items-center min-h-64">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-paint-600"></div>
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-paint-600" />
       </div>
     );
   }

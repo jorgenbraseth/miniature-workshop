@@ -2,14 +2,14 @@ import { useState, useEffect } from 'preact/hooks';
 import { authService, AuthState } from '../services/auth';
 import { syncService, SyncStatus } from '../services/sync';
 import { storageService } from '../services/storage';
-import AuthGuard from '../components/AuthGuard';
+import { StorageStats } from '../types';
 import LoginButton from '../components/LoginButton';
 import SyncStatusComponent from '../components/SyncStatus';
 
 export default function SettingsPage() {
   const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
-  const [storageStats, setStorageStats] = useState<any>(null);
+  const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
 
   useEffect(() => {
     const authUnsubscribe = authService.subscribe(setAuthState);
@@ -41,7 +41,7 @@ export default function SettingsPage() {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   };
 
   return (
@@ -146,7 +146,7 @@ export default function SettingsPage() {
           </div>
         ) : (
           <div class="text-center py-4">
-            <div class="loading-spinner h-6 w-6 mx-auto mb-2"></div>
+            <div class="loading-spinner h-6 w-6 mx-auto mb-2" />
             <p class="text-workshop-600">Loading storage stats...</p>
           </div>
         )}

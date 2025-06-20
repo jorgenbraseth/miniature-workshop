@@ -9,7 +9,7 @@ export default function Header() {
 
   return (
     <header class="bg-white shadow-workshop border-b border-workshop-200 relative">
-      <div class="absolute inset-0 bg-gradient-to-r from-workshop-50 to-paint-50 opacity-50"></div>
+      <div class="absolute inset-0 bg-gradient-to-r from-workshop-50 to-paint-50 opacity-50" />
       <div class="container mx-auto px-4 relative">
         <div class="flex items-center justify-between h-16">
           {/* Logo and brand */}

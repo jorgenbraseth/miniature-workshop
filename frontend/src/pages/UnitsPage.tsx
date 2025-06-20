@@ -25,7 +25,7 @@ export default function UnitsPage() {
   if (loading) {
     return (
       <div class="flex justify-center items-center min-h-64">
-        <div class="loading-spinner h-8 w-8"></div>
+        <div class="loading-spinner h-8 w-8" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ export default function UnitsPage() {
                     alt={`${unit.name} thumbnail`}
                     class="w-full h-full object-cover"
                   />
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                   <div class="absolute top-3 right-3 flex items-center gap-2">
                     <span class={`px-2 py-1 text-xs rounded-full font-medium backdrop-blur-sm ${
                       unit.isComplete 

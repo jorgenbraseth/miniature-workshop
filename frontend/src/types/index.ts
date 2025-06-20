@@ -116,7 +116,7 @@ export interface SyncQueueItem {
   id: string;
   type: 'unit' | 'step' | 'photo';
   action: 'create' | 'update' | 'delete';
-  data: any;
+  data: Unit | Step | Photo | { id: string };
   timestamp: Date;
   retryCount: number;
 }

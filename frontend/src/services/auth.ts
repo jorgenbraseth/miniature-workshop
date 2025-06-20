@@ -186,7 +186,7 @@ class AuthService {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/user`, {
         headers: {
-          'Authorization': `Bearer ${this.authState.token}`,
+          Authorization: `Bearer ${this.authState.token}`,
         },
       });
 
