@@ -151,6 +151,23 @@ export const updateUnit = async (id: string, updates: Partial<Unit>): Promise<Un
     }
   });
 
+  // Handle GSI fields that need special formatting
+  if (updates.userId !== undefined) {
+    updateExpressions.push('#GSI1PK = :GSI1PK', '#GSI1SK = :GSI1SK');
+    expressionAttributeNames['#GSI1PK'] = 'GSI1PK';
+    expressionAttributeNames['#GSI1SK'] = 'GSI1SK';
+    expressionAttributeValues[':GSI1PK'] = updates.userId;
+    expressionAttributeValues[':GSI1SK'] = updates.createdAt || now;
+  }
+
+  if (updates.isPublic !== undefined) {
+    updateExpressions.push('#GSI2PK = :GSI2PK', '#GSI2SK = :GSI2SK');
+    expressionAttributeNames['#GSI2PK'] = 'GSI2PK';
+    expressionAttributeNames['#GSI2SK'] = 'GSI2SK';
+    expressionAttributeValues[':GSI2PK'] = updates.isPublic.toString();
+    expressionAttributeValues[':GSI2SK'] = updates.createdAt || now;
+  }
+
   // Always update updatedAt
   updateExpressions.push('#updatedAt = :updatedAt');
   expressionAttributeNames['#updatedAt'] = 'updatedAt';
