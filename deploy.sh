@@ -34,10 +34,16 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
+# Check if pnpm is installed
+if ! command -v pnpm &> /dev/null; then
+    echo -e "${YELLOW}⚠️  pnpm not found, installing...${NC}"
+    npm install -g pnpm
+fi
+
 # Check if Serverless Framework is installed
 if ! command -v serverless &> /dev/null; then
     echo -e "${YELLOW}⚠️  Serverless Framework not found, installing...${NC}"
-    npm install -g serverless
+    pnpm add -g serverless
 fi
 
 # Check environment variables
@@ -55,10 +61,10 @@ echo -e "${BLUE}🔧 Deploying backend...${NC}"
 cd $BACKEND_DIR
 
 echo "Installing backend dependencies..."
-npm install
+pnpm install
 
 echo "Deploying backend to AWS..."
-npm run deploy
+pnpm run deploy
 
 # Get API Gateway URL from serverless output
 API_URL=$(serverless info --stage prod | grep "HttpApiUrl" | awk '{print $2}')
@@ -78,10 +84,10 @@ echo -e "${BLUE}🎨 Deploying frontend...${NC}"
 cd $FRONTEND_DIR
 
 echo "Installing frontend dependencies..."
-npm install
+pnpm install
 
 echo "Building frontend..."
-VITE_API_BASE_URL=$API_URL npm run build
+VITE_API_BASE_URL=$API_URL pnpm run build
 
 echo "Deploying to Vercel..."
 if command -v vercel &> /dev/null; then
@@ -89,7 +95,7 @@ if command -v vercel &> /dev/null; then
     echo -e "${GREEN}✅ Frontend deployed to Vercel${NC}"
 else
     echo -e "${YELLOW}⚠️  Vercel CLI not found. Please install it or deploy manually:${NC}"
-    echo "npm install -g vercel"
+    echo "pnpm add -g vercel"
     echo "vercel --prod"
 fi
 

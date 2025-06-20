@@ -1,163 +1,171 @@
 # Miniature Workshop Backend
 
-This is the serverless backend API for Miniature Workshop, built with AWS Lambda, DynamoDB, and S3.
+Backend API for Miniature Workshop - A comprehensive tool for documenting and sharing miniature painting techniques.
 
 ## Architecture
 
-- **Runtime**: Node.js 18.x with TypeScript
-- **API Gateway**: HTTP API with CORS support
-- **Database**: DynamoDB with GSI indexes for efficient querying
-- **Storage**: S3 for image storage with presigned URLs
-- **Authentication**: Google OAuth 2.0 token verification
-- **Infrastructure**: Serverless Framework for AWS deployment
+Built with AWS serverless architecture using:
+- **AWS Lambda** for API endpoints
+- **Amazon DynamoDB** for data storage
+- **Amazon S3** for image storage
+- **Google OAuth** for authentication
 
 ## Prerequisites
 
-1. **AWS CLI** configured with appropriate permissions
-2. **Node.js** 18.x or higher
-3. **Serverless Framework** CLI (`npm install -g serverless`)
-4. **Google Cloud Console** project with OAuth 2.0 credentials
+1. **Node.js** (version 18 or higher)
+2. **AWS CLI** configured with appropriate credentials
+3. **Serverless Framework** CLI (`pnpm add -g serverless`)
+4. **Google Cloud Console** project with OAuth credentials
 
-## Setup
+## Quick Start
 
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+```bash
+pnpm install
+```
 
-2. **Configure environment variables**:
-   ```bash
-   # Set your Google OAuth client ID
-   export GOOGLE_CLIENT_ID="your-client-id.apps.googleusercontent.com"
-   ```
+## Configuration
 
-3. **Deploy to AWS**:
-   ```bash
-   # Deploy to production
-   npm run deploy
-   ```
+Create environment variables or update `serverless.yml`:
+
+```yaml
+environment:
+  GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+  STAGE: ${self:provider.stage}
+```
+
+## Deployment
+
+```bash
+pnpm run deploy
+```
+
+This will:
+1. Bundle TypeScript code
+2. Deploy Lambda functions
+3. Create DynamoDB tables
+4. Set up S3 bucket for images
+5. Configure API Gateway routes
 
 ## API Endpoints
 
 ### Authentication
-- `POST /auth/verify` - Verify Google OAuth token and create/login user
-- `GET /auth/user` - Get current authenticated user
+- `POST /auth/google` - Authenticate with Google OAuth token
 
 ### Units
-- `GET /units` - List units (public or user's units with `?scope=user`)
-- `GET /units/{id}` - Get specific unit
+- `GET /units` - List all units (public)
 - `POST /units` - Create new unit (authenticated)
+- `GET /units/{id}` - Get unit details
 - `PUT /units/{id}` - Update unit (authenticated, owner only)
 - `DELETE /units/{id}` - Delete unit (authenticated, owner only)
 
 ### Steps
-- `POST /units/{unitId}/steps` - Create step in unit (authenticated, owner only)
-- `PUT /units/{unitId}/steps/{stepId}` - Update step (authenticated, owner only)
-- `DELETE /units/{unitId}/steps/{stepId}` - Delete step (authenticated, owner only)
+- `GET /units/{unitId}/steps` - List steps for a unit
+- `POST /units/{unitId}/steps` - Add step to unit (authenticated)
+- `PUT /steps/{id}` - Update step (authenticated, owner only)
+- `DELETE /steps/{id}` - Delete step (authenticated, owner only)
 
 ### Images
 - `POST /images/upload-url` - Get presigned URL for image upload (authenticated)
-- `POST /images/upload` - Direct image upload (not implemented, use presigned URL)
+- `GET /images/{id}` - Get image (public)
 
 ### Sync
-- `POST /sync` - Sync data from frontend (authenticated)
-- `GET /sync/status` - Get sync status (authenticated)
-
-## Authentication
-
-All protected endpoints require a `Bearer` token in the `Authorization` header:
-
-```
-Authorization: Bearer <google-oauth-token>
-```
-
-The token is verified against Google's OAuth 2.0 service.
-
-## Data Models
-
-### Unit
-- Contains painting project information
-- Has multiple steps with techniques and photos
-- Can be public or private
-- Tracks sync status for offline-first functionality
-
-### Step
-- Individual painting steps within a unit
-- Contains technique details, paints used, tools, and photos
-- Can apply to specific models within the unit
-
-### Photo
-- Stored in S3 with metadata
-- Supports different types: detail, full_model, unit_overview
-- Can be public or private
+- `POST /sync` - Sync local data to cloud (authenticated)
+- `GET /sync/since/{timestamp}` - Get changes since timestamp (authenticated)
 
 ## Development
 
-1. **Run locally** (requires `serverless-offline`):
-   ```bash
-   npm run offline
-   ```
+### Local Development
+```bash
+pnpm run offline
+```
 
-2. **Run tests**:
-   ```bash
-   npm test
-   ```
+### Testing
+```bash
+pnpm test
+```
 
-3. **Lint code**:
-   ```bash
-   npm run lint
-   ```
+### Linting
+```bash
+pnpm run lint
+```
 
-4. **Build TypeScript**:
-   ```bash
-   npm run build
-   ```
+### Building
+```bash
+pnpm run build
+```
 
-## Deployment
+## Deployment Stages
 
-The backend deploys to production:
-
-- **Production**: `npm run deploy`
-
-This creates AWS resources with production-specific names.
+- **Development**: `serverless deploy --stage dev`
+- **Production**: `pnpm run deploy`
 
 ## Environment Variables
 
 Required environment variables:
+- `GOOGLE_CLIENT_ID` - Google OAuth client ID
+- `AWS_ACCESS_KEY_ID` - AWS access key (for deployment)
+- `AWS_SECRET_ACCESS_KEY` - AWS secret key (for deployment)
 
-- `GOOGLE_CLIENT_ID` - Google OAuth 2.0 client ID
-- `REGION` - AWS region (default: us-east-1)
+## Database Schema
 
-Auto-generated by Serverless Framework:
-- `UNITS_TABLE` - DynamoDB table for units
-- `USERS_TABLE` - DynamoDB table for users
-- `SYNC_QUEUE_TABLE` - DynamoDB table for sync queue
-- `IMAGES_BUCKET` - S3 bucket for images
+### Units Table
+- `id` (String, Primary Key)
+- `name` (String)
+- `description` (String)
+- `gameSystem` (String)
+- `faction` (String)
+- `userId` (String, GSI)
+- `createdAt` (String)
+- `updatedAt` (String)
 
-## Cost Optimization
+### Steps Table
+- `id` (String, Primary Key)
+- `unitId` (String, GSI)
+- `title` (String)
+- `description` (String)
+- `techniques` (List)
+- `paints` (List)
+- `brushes` (List)
+- `photos` (List)
+- `order` (Number)
+- `userId` (String)
+- `createdAt` (String)
+- `updatedAt` (String)
 
-The backend is designed for cost efficiency:
+### Users Table
+- `id` (String, Primary Key)
+- `email` (String, GSI)
+- `name` (String)
+- `picture` (String)
+- `createdAt` (String)
+- `lastLoginAt` (String)
 
-- **DynamoDB**: Pay-per-request pricing
-- **Lambda**: Pay-per-invocation with generous free tier
-- **S3**: Standard storage with lifecycle policies (can be added)
-- **API Gateway**: HTTP API (cheaper than REST API)
+## Error Handling
+
+The API uses standard HTTP status codes:
+- `200` - Success
+- `201` - Created
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `500` - Internal Server Error
 
 ## Security
 
-- **Authentication**: Google OAuth 2.0 token verification
-- **Authorization**: User-based access control for private resources
-- **CORS**: Configured for frontend domains
-- **S3**: Bucket policies restrict access to authorized users
-- **DynamoDB**: IAM roles with least-privilege access
+- All write operations require authentication
+- Users can only modify their own content
+- Google OAuth tokens are validated on each request
+- Input validation using Joi schemas
+- CORS enabled for frontend domains
 
 ## Monitoring
 
 AWS CloudWatch automatically monitors:
-- Lambda function metrics and logs
-- API Gateway request metrics
-- DynamoDB performance metrics
-- S3 access logs
+- Lambda function execution
+- API Gateway requests
+- DynamoDB operations
+- Error rates and latency
 
 ## Troubleshooting
 

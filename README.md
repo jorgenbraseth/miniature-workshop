@@ -15,10 +15,10 @@ Miniature Workshop is a comprehensive tool designed for Warhammer and tabletop m
 
 ### Prerequisites
 - Node.js (version 18 or higher)
-- npm or yarn package manager
+- pnpm package manager (`npm install -g pnpm`)
 - Modern web browser with camera support (for photo capture)
 - AWS CLI configured (for backend deployment)
-- Serverless Framework CLI (`npm install -g serverless`)
+- Serverless Framework CLI (`pnpm add -g serverless`)
 - Google Cloud Console project (for OAuth setup)
 - Vercel CLI (for frontend deployment)
 
@@ -38,18 +38,18 @@ Miniature Workshop is a comprehensive tool designed for Warhammer and tabletop m
 ```bash
 # Install frontend dependencies
 cd frontend
-npm install
+pnpm install
 
 # Install backend dependencies
 cd ../backend
-npm install
+pnpm install
 
 # Deploy backend
-npm run deploy
+pnpm run deploy
 
 # Deploy frontend
 cd ../frontend
-npm run build
+pnpm run build
 vercel --prod
 ```
 

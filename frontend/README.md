@@ -1,15 +1,20 @@
-# `create-preact`
+# Miniature Workshop Frontend
 
-<h2 align="center">
-  <img height="256" width="256" src="./src/assets/preact.svg">
-</h2>
+Frontend application for Miniature Workshop - A comprehensive tool for documenting and sharing miniature painting techniques.
 
-<h3 align="center">Get started using Preact and Vite!</h3>
+Built with Preact, TypeScript, and Tailwind CSS for a fast, modern, and responsive user experience.
 
-## Getting Started
+## Quick Start
 
--   `npm run dev` - Starts a dev server at http://localhost:5173/
+```bash
+pnpm install
+pnpm run dev
+```
 
--   `npm run build` - Builds for production, emitting to `dist/`
+## Available Scripts
 
--   `npm run preview` - Starts a server at http://localhost:4173/ to test production build locally
+-   `pnpm run dev` - Starts a dev server at http://localhost:5173/
+
+-   `pnpm run build` - Builds for production, emitting to `dist/`
+
+-   `pnpm run preview` - Starts a server at http://localhost:4173/ to test production build locally
