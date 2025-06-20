@@ -44,13 +44,10 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [UnitsTable, Arn]
-            - Fn::GetAtt: [UsersTable, Arn]
-            - Fn::GetAtt: [SyncQueueTable, Arn]
-            - Fn::Join:
-                - '/'
-                - - Fn::GetAtt: [UnitsTable, Arn]
-                  - 'index/*'
+            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-units"
+            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-users"
+            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-sync-queue"
+            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-units/index/*"
         - Effect: Allow
           Action:
             - s3:GetObject
@@ -59,15 +56,12 @@ provider:
             - s3:GetObjectAcl
             - s3:PutObjectAcl
           Resource:
-            - Fn::Join:
-                - ''
-                - - Fn::GetAtt: [ImagesBucket, Arn]
-                  - '/*'
+            - "arn:aws:s3:::${self:service}-prod-images/*"
         - Effect: Allow
           Action:
             - s3:ListBucket
           Resource:
-            - Fn::GetAtt: [ImagesBucket, Arn]
+            - "arn:aws:s3:::${self:service}-prod-images"
 
 package:
   individually: true
