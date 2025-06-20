@@ -53,6 +53,12 @@ provider:
             - s3:PutObjectAcl
             - s3:ListBucket
           Resource: "*"
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
 
 package:
   individually: true
@@ -76,7 +82,6 @@ functions:
   auth:
     handler: src/handlers/auth.handler
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /auth/verify
@@ -89,7 +94,6 @@ functions:
   getUnits:
     handler: src/handlers/units.getUnits
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units
@@ -98,7 +102,6 @@ functions:
   getUnit:
     handler: src/handlers/units.getUnit
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{id}
@@ -107,7 +110,6 @@ functions:
   createUnit:
     handler: src/handlers/units.createUnit
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units
@@ -116,7 +118,6 @@ functions:
   updateUnit:
     handler: src/handlers/units.updateUnit
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{id}
@@ -125,7 +126,6 @@ functions:
   deleteUnit:
     handler: src/handlers/units.deleteUnit
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{id}
@@ -135,7 +135,6 @@ functions:
   createStep:
     handler: src/handlers/steps.createStep
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{unitId}/steps
@@ -144,7 +143,6 @@ functions:
   updateStep:
     handler: src/handlers/steps.updateStep
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{unitId}/steps/{stepId}
@@ -153,7 +151,6 @@ functions:
   deleteStep:
     handler: src/handlers/steps.deleteStep
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /units/{unitId}/steps/{stepId}
@@ -164,7 +161,6 @@ functions:
     handler: src/handlers/images.uploadImage
     timeout: 25
     memorySize: 512
-    disableLogs: true
     events:
       - httpApi:
           path: /images/upload
@@ -173,7 +169,6 @@ functions:
   getImageUploadUrl:
     handler: src/handlers/images.getUploadUrl
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /images/upload-url
@@ -183,7 +178,6 @@ functions:
   syncData:
     handler: src/handlers/sync.syncData
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /sync
@@ -192,7 +186,6 @@ functions:
   getSyncStatus:
     handler: src/handlers/sync.getSyncStatus
     timeout: 25
-    disableLogs: true
     events:
       - httpApi:
           path: /sync/status
