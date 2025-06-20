@@ -182,12 +182,34 @@ jobs:
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
+      - name: Debug environment variables
+        run: |
+          echo "🔍 Environment Variables Check:"
+          echo "API_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}"
+          echo "GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID != '' && '✅ Set' || '❌ Not Set' }}"
+          
       - name: Build frontend for production
         working-directory: ./frontend
         run: pnpm run build
         env:
           VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+
+      - name: Verify build contains environment variables
+        working-directory: ./frontend
+        run: |
+          echo "🔍 Checking if environment variables are in built files:"
+          if grep -r "VITE_GOOGLE_CLIENT_ID" dist/ 2>/dev/null; then
+            echo "❌ Environment variable names found in build (should be replaced with values)"
+          else
+            echo "✅ Environment variable names not found (good - they were replaced)"
+          fi
+          
+          if grep -r "apps.googleusercontent.com" dist/ 2>/dev/null; then
+            echo "✅ Google Client ID found in build"
+          else
+            echo "❌ Google Client ID not found in build"
+          fi
 
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
@@ -199,6 +221,9 @@ jobs:
           vercel-args: '--prod'
           alias-domains: |
             miniature-workshop.vercel.app
+        env:
+          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
   # Summary job to show what was deployed
   deployment-summary:
