@@ -1,13 +1,27 @@
 import { route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
 import { storageService } from '../services/storage';
+import { authService, AuthState } from '../services/auth';
+import { syncService, SyncStatus } from '../services/sync';
 import { StorageStats } from '../types';
+import LoginButton from '../components/LoginButton';
+import SyncStatusComponent from '../components/SyncStatus';
 
 export default function HomePage() {
   const [stats, setStats] = useState<StorageStats | null>(null);
+  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
 
   useEffect(() => {
     loadStats();
+    
+    const authUnsubscribe = authService.subscribe(setAuthState);
+    const syncUnsubscribe = syncService.subscribe(setSyncStatus);
+    
+    return () => {
+      authUnsubscribe();
+      syncUnsubscribe();
+    };
   }, []);
 
   const loadStats = async () => {
@@ -51,6 +65,29 @@ export default function HomePage() {
             View My Units
           </button>
         </div>
+        
+        {/* Sync Status for authenticated users */}
+        {authState.isAuthenticated && (
+          <div class="mt-6 p-4 bg-workshop-50 rounded-lg border border-workshop-200">
+            <div class="flex items-center justify-center space-x-4">
+              <span class="text-sm text-workshop-600">Sync Status:</span>
+              <SyncStatusComponent />
+            </div>
+          </div>
+        )}
+        
+        {/* Login prompt for unauthenticated users */}
+        {!authState.isAuthenticated && (
+          <div class="mt-6 p-6 bg-gradient-to-r from-paint-50 to-brush-50 rounded-lg border border-paint-200">
+            <div class="text-center">
+              <h3 class="text-lg font-semibold text-workshop-900 mb-2">☁️ Sync Your Data</h3>
+              <p class="text-workshop-600 mb-4">
+                Sign in to backup your work and sync across devices
+              </p>
+              <LoginButton />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats Cards */}

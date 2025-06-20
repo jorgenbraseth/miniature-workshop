@@ -310,6 +310,32 @@ class StorageService {
     });
   }
 
+  async updateSyncQueueItem(item: SyncQueueItem): Promise<void> {
+    if (!this.db) return;
+
+    const transaction = this.db.transaction([STORES.SYNC_QUEUE], 'readwrite');
+    const store = transaction.objectStore(STORES.SYNC_QUEUE);
+
+    await new Promise<void>((resolve, reject) => {
+      const request = store.put(item);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  async removeSyncQueueItem(itemId: string): Promise<void> {
+    if (!this.db) return;
+
+    const transaction = this.db.transaction([STORES.SYNC_QUEUE], 'readwrite');
+    const store = transaction.objectStore(STORES.SYNC_QUEUE);
+
+    await new Promise<void>((resolve, reject) => {
+      const request = store.delete(itemId);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   async getStorageStats(): Promise<StorageStats> {
     if (!this.db) {
       return {

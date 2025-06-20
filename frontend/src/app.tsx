@@ -1,6 +1,8 @@
 import { Router, Route } from 'preact-router';
 import { useEffect, useState } from 'preact/hooks';
 import { storageService } from './services/storage';
+import { authService } from './services/auth';
+import { syncService } from './services/sync';
 
 // Components (we'll create these next)
 import Header from './components/Header';
@@ -24,6 +26,7 @@ export function App() {
   const initializeStorage = async () => {
     try {
       await storageService.initialize();
+      // Auth and sync services are initialized automatically
       setIsStorageReady(true);
     } catch (error) {
       console.error('Failed to initialize storage:', error);

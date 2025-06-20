@@ -58,6 +58,10 @@
   .input-field {
     @apply w-full px-3 py-2 border border-workshop-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paint-500 focus:border-paint-500 bg-white transition-all duration-200;
   }
+
+  .loading-spinner {
+    @apply border-4 border-workshop-200 border-t-paint-500 rounded-full animate-spin;
+  }
   
   .textarea-field {
     @apply w-full px-3 py-2 border border-workshop-300 rounded-md focus:outline-none focus:ring-2 focus:ring-paint-500 focus:border-paint-500 bg-white resize-y transition-all duration-200;

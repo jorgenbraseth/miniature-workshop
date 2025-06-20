@@ -1,4 +1,6 @@
 import { route } from 'preact-router';
+import LoginButton from './LoginButton';
+import SyncStatusComponent from './SyncStatus';
 
 export default function Header() {
   const navigateHome = () => {
@@ -50,6 +52,14 @@ export default function Header() {
               <span>New Unit</span>
             </div>
           </nav>
+
+          {/* User and sync status */}
+          <div class="flex items-center space-x-4">
+            <div class="hidden md:block">
+              <SyncStatusComponent />
+            </div>
+            <LoginButton />
+          </div>
 
           {/* Mobile menu button */}
           <div class="md:hidden">

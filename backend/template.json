@@ -1,0 +1,506 @@
+{
+  "service": "miniature-workshop-backend",
+  "frameworkVersion": "3",
+  "provider": {
+    "name": "aws",
+    "runtime": "nodejs18.x",
+    "stage": "prod",
+    "region": "eu-west-1",
+    "memorySize": 256,
+    "timeout": 25,
+    "environment": {
+      "STAGE": "prod",
+      "REGION": "eu-west-1",
+      "UNITS_TABLE": "miniature-workshop-backend-prod-units",
+      "USERS_TABLE": "miniature-workshop-backend-prod-users",
+      "SYNC_QUEUE_TABLE": "miniature-workshop-backend-prod-sync-queue",
+      "IMAGES_BUCKET": "miniature-workshop-backend-prod-images",
+      "GOOGLE_CLIENT_ID": "not-set"
+    },
+    "httpApi": {
+      "cors": {
+        "allowedOrigins": [
+          "http://localhost:5173",
+          "https://miniature-workshop.vercel.app/",
+          "https://miniature-workshop.com"
+        ],
+        "allowedHeaders": [
+          "Content-Type",
+          "Authorization"
+        ],
+        "allowedMethods": [
+          "GET",
+          "POST",
+          "PUT",
+          "DELETE"
+        ]
+      }
+    },
+    "iam": {
+      "role": {
+        "statements": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "dynamodb:Query",
+              "dynamodb:Scan",
+              "dynamodb:GetItem",
+              "dynamodb:PutItem",
+              "dynamodb:UpdateItem",
+              "dynamodb:DeleteItem"
+            ],
+            "Resource": [
+              {
+                "Fn::GetAtt": [
+                  "UnitsTable",
+                  "Arn"
+                ]
+              },
+              {
+                "Fn::GetAtt": [
+                  "UsersTable",
+                  "Arn"
+                ]
+              },
+              {
+                "Fn::GetAtt": [
+                  "SyncQueueTable",
+                  "Arn"
+                ]
+              },
+              {
+                "Fn::Sub": "${UnitsTable.Arn}/index/*"
+              }
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:DeleteObject",
+              "s3:GetObjectAcl",
+              "s3:PutObjectAcl"
+            ],
+            "Resource": [
+              {
+                "Fn::Sub": "${ImagesBucket.Arn}/*"
+              }
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              {
+                "Fn::GetAtt": [
+                  "ImagesBucket",
+                  "Arn"
+                ]
+              }
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ],
+            "Resource": [
+              {
+                "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/miniature-workshop-backend-prod-*"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "versionFunctions": true
+  },
+  "package": {
+    "individually": true,
+    "patterns": [
+      "!node_modules/**",
+      "!.git/**",
+      "!.serverless/**",
+      "!coverage/**",
+      "!**/*.test.ts",
+      "!**/*.spec.ts",
+      "!README.md",
+      "!tsconfig.json",
+      "dist/**"
+    ],
+    "artifactsS3KeyDirname": "serverless/miniature-workshop-backend/prod/code-artifacts"
+  },
+  "plugins": [
+    "serverless-plugin-typescript",
+    "serverless-offline"
+  ],
+  "functions": {
+    "auth": {
+      "handler": "src/handlers/auth.handler",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/auth/verify",
+            "method": "post"
+          }
+        },
+        {
+          "httpApi": {
+            "path": "/auth/user",
+            "method": "get"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-auth"
+    },
+    "getUnits": {
+      "handler": "src/handlers/units.getUnits",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units",
+            "method": "get"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-getUnits"
+    },
+    "getUnit": {
+      "handler": "src/handlers/units.getUnit",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{id}",
+            "method": "get"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-getUnit"
+    },
+    "createUnit": {
+      "handler": "src/handlers/units.createUnit",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units",
+            "method": "post"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-createUnit"
+    },
+    "updateUnit": {
+      "handler": "src/handlers/units.updateUnit",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{id}",
+            "method": "put"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-updateUnit"
+    },
+    "deleteUnit": {
+      "handler": "src/handlers/units.deleteUnit",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{id}",
+            "method": "delete"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-deleteUnit"
+    },
+    "createStep": {
+      "handler": "src/handlers/steps.createStep",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{unitId}/steps",
+            "method": "post"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-createStep"
+    },
+    "updateStep": {
+      "handler": "src/handlers/steps.updateStep",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{unitId}/steps/{stepId}",
+            "method": "put"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-updateStep"
+    },
+    "deleteStep": {
+      "handler": "src/handlers/steps.deleteStep",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/units/{unitId}/steps/{stepId}",
+            "method": "delete"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-deleteStep"
+    },
+    "uploadImage": {
+      "handler": "src/handlers/images.uploadImage",
+      "timeout": 25,
+      "memorySize": 512,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/images/upload",
+            "method": "post"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-uploadImage"
+    },
+    "getImageUploadUrl": {
+      "handler": "src/handlers/images.getUploadUrl",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/images/upload-url",
+            "method": "post"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-getImageUploadUrl"
+    },
+    "syncData": {
+      "handler": "src/handlers/sync.syncData",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/sync",
+            "method": "post"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-syncData"
+    },
+    "getSyncStatus": {
+      "handler": "src/handlers/sync.getSyncStatus",
+      "timeout": 25,
+      "events": [
+        {
+          "httpApi": {
+            "path": "/sync/status",
+            "method": "get"
+          }
+        }
+      ],
+      "name": "miniature-workshop-backend-prod-getSyncStatus"
+    }
+  },
+  "resources": {
+    "Resources": {
+      "UnitsTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": "miniature-workshop-backend-prod-units",
+          "BillingMode": "PAY_PER_REQUEST",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "userId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "isPublic",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "createdAt",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "GlobalSecondaryIndexes": [
+            {
+              "IndexName": "UserIndex",
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              }
+            },
+            {
+              "IndexName": "PublicIndex",
+              "KeySchema": [
+                {
+                  "AttributeName": "isPublic",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "createdAt",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              }
+            }
+          ]
+        }
+      },
+      "UsersTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": "miniature-workshop-backend-prod-users",
+          "BillingMode": "PAY_PER_REQUEST",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "email",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "GlobalSecondaryIndexes": [
+            {
+              "IndexName": "EmailIndex",
+              "KeySchema": [
+                {
+                  "AttributeName": "email",
+                  "KeyType": "HASH"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              }
+            }
+          ]
+        }
+      },
+      "SyncQueueTable": {
+        "Type": "AWS::DynamoDB::Table",
+        "Properties": {
+          "TableName": "miniature-workshop-backend-prod-sync-queue",
+          "BillingMode": "PAY_PER_REQUEST",
+          "AttributeDefinitions": [
+            {
+              "AttributeName": "id",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "userId",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "timestamp",
+              "AttributeType": "S"
+            }
+          ],
+          "KeySchema": [
+            {
+              "AttributeName": "id",
+              "KeyType": "HASH"
+            }
+          ],
+          "GlobalSecondaryIndexes": [
+            {
+              "IndexName": "UserTimestampIndex",
+              "KeySchema": [
+                {
+                  "AttributeName": "userId",
+                  "KeyType": "HASH"
+                },
+                {
+                  "AttributeName": "timestamp",
+                  "KeyType": "RANGE"
+                }
+              ],
+              "Projection": {
+                "ProjectionType": "ALL"
+              }
+            }
+          ],
+          "TimeToLiveSpecification": {
+            "AttributeName": "ttl",
+            "Enabled": true
+          }
+        }
+      },
+      "ImagesBucket": {
+        "Type": "AWS::S3::Bucket",
+        "Properties": {
+          "BucketName": "miniature-workshop-backend-prod-images",
+          "CorsConfiguration": {
+            "CorsRules": [
+              {
+                "AllowedHeaders": [
+                  "*"
+                ],
+                "AllowedMethods": [
+                  "GET",
+                  "PUT",
+                  "POST",
+                  "DELETE"
+                ],
+                "AllowedOrigins": [
+                  "*"
+                ],
+                "MaxAge": 3000
+              }
+            ]
+          },
+          "PublicAccessBlockConfiguration": {
+            "BlockPublicAcls": true,
+            "BlockPublicPolicy": true,
+            "IgnorePublicAcls": true,
+            "RestrictPublicBuckets": true
+          }
+        }
+      }
+    }
+  }
+}

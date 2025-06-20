@@ -107,7 +107,8 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
-  createdAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Storage and sync types

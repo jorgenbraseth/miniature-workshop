@@ -1,8 +1,56 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { requireAuth } from '../utils/auth';
-import { getUserUnits } from '../services/dynamodb';
+import { getUserUnits, getUnit, createUnit, updateUnit, deleteUnit } from '../services/dynamodb';
 import { successResponse, errorResponse, serverErrorResponse, unauthorizedResponse } from '../utils/response';
-import { SyncDataRequest, SyncDataResponse } from '../types';
+import { SyncDataRequest, SyncDataResponse, Unit, SyncQueueItem } from '../types';
+
+const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void> => {
+  const unitData = item.data as Unit;
+  
+  // Ensure the unit belongs to the authenticated user
+  if (unitData.userId && unitData.userId !== userId) {
+    throw new Error('Unauthorized: Unit does not belong to user');
+  }
+
+  switch (item.action) {
+    case 'create':
+      // Check if unit already exists
+      const existingUnit = await getUnit(unitData.id);
+      if (existingUnit) {
+        // Unit exists, update it instead
+        await updateUnit(unitData.id, {
+          ...unitData,
+          userId,
+          syncStatus: 'synced',
+          lastSyncAt: new Date().toISOString(),
+        });
+      } else {
+        // Create new unit
+        await createUnit({
+          ...unitData,
+          userId,
+          syncStatus: 'synced',
+        });
+      }
+      break;
+
+    case 'update':
+      await updateUnit(unitData.id, {
+        ...unitData,
+        userId,
+        syncStatus: 'synced',
+        lastSyncAt: new Date().toISOString(),
+      });
+      break;
+
+    case 'delete':
+      await deleteUnit(unitData.id);
+      break;
+
+    default:
+      throw new Error(`Unknown sync action: ${item.action}`);
+  }
+};
 
 export const syncData: APIGatewayProxyHandler = async (event) => {
   try {
@@ -16,29 +64,31 @@ export const syncData: APIGatewayProxyHandler = async (event) => {
       return errorResponse('Invalid sync request format');
     }
 
-    const processed = 0;
+    let processed = 0;
     const failed: SyncDataResponse['failed'] = [];
 
     // Process sync items
-    // This is a simplified implementation - in production, you'd want more sophisticated
-    // conflict resolution and batch processing
     for (const item of syncRequest.items) {
       try {
         // Process each sync item based on type and action
         switch (item.type) {
           case 'unit':
-            // Handle unit sync
+            await handleUnitSync(item, authUser.id);
             break;
           case 'step':
-            // Handle step sync
+            // TODO: Implement step sync when step handlers are available
+            console.log('Step sync not yet implemented:', item);
             break;
           case 'photo':
-            // Handle photo sync
+            // TODO: Implement photo sync when photo handlers are available
+            console.log('Photo sync not yet implemented:', item);
             break;
           default:
             throw new Error(`Unknown sync item type: ${item.type}`);
         }
+        processed++;
       } catch (error) {
+        console.error('Failed to process sync item:', item, error);
         failed.push({
           item,
           error: error instanceof Error ? error.message : 'Unknown error',
