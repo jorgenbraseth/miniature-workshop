@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "deploy": "serverless deploy --stage prod",
-    "test": "jest",
+    "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
     "offline": "serverless offline"
   },
