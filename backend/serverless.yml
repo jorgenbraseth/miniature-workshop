@@ -17,7 +17,7 @@ provider:
     SYNC_QUEUE_TABLE: ${self:service}-prod-sync-queue
     IMAGES_BUCKET: ${self:service}-prod-images
     GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID, 'not-set'}
-    httpApi:
+  httpApi:
     cors:
       allowedOrigins:
         - http://localhost:5173
