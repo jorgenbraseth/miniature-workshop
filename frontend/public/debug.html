@@ -5,116 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Debug - Miniature Workshop</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        .debug-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .status { padding: 8px 12px; border-radius: 4px; font-weight: bold; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        .warning { background: #fff3cd; color: #856404; }
-        code { background: #f1f3f4; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: #f5f5f5;
+            text-align: center;
+        }
+        .redirect-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .btn {
+            background: #f59e0b;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background: #d97706;
+        }
     </style>
 </head>
 <body>
-    <h1>🔍 Miniature Workshop Debug Page</h1>
-    
-    <div class="debug-card">
-        <h2>Environment Variables</h2>
-        <div id="env-check"></div>
-    </div>
-    
-    <div class="debug-card">
-        <h2>Google OAuth Status</h2>
-        <div id="google-check"></div>
-    </div>
-    
-    <div class="debug-card">
-        <h2>API Connection</h2>
-        <div id="api-check"></div>
+    <div class="redirect-card">
+        <h1>🔍 Debug Page Moved</h1>
+        <p>The debug page has been moved to a proper React component that can access environment variables.</p>
+        <a href="/debug" class="btn">Go to Debug Page</a>
+        <p style="margin-top: 20px; font-size: 14px; color: #666;">
+            You will be redirected automatically in 3 seconds...
+        </p>
     </div>
 
-    <script type="module">
-        // Check environment variables
-        const envDiv = document.getElementById('env-check');
-        const googleDiv = document.getElementById('google-check');
-        const apiDiv = document.getElementById('api-check');
-        
-        // Environment variables check
-        const apiUrl = import.meta.env.VITE_API_BASE_URL;
-        const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-        
-        envDiv.innerHTML = `
-            <p><strong>VITE_API_BASE_URL:</strong> 
-                <span class="status ${apiUrl ? 'success' : 'error'}">
-                    ${apiUrl || 'Not set'}
-                </span>
-            </p>
-            <p><strong>VITE_GOOGLE_CLIENT_ID:</strong> 
-                <span class="status ${googleClientId ? 'success' : 'error'}">
-                    ${googleClientId ? '✅ Set (' + googleClientId.substring(0, 20) + '...)' : '❌ Not set'}
-                </span>
-            </p>
-        `;
-        
-        // Google OAuth check
-        if (googleClientId) {
-            googleDiv.innerHTML = `
-                <div class="status success">✅ Google Client ID is configured</div>
-                <p>Client ID: <code>${googleClientId}</code></p>
-                <p>This should end with <code>.apps.googleusercontent.com</code></p>
-            `;
-        } else {
-            googleDiv.innerHTML = `
-                <div class="status error">❌ Google Client ID is missing</div>
-                <p>The environment variable <code>VITE_GOOGLE_CLIENT_ID</code> is not set.</p>
-                <p>This will cause "Google Client ID not configured" errors.</p>
-            `;
-        }
-        
-        // API check
-        if (apiUrl) {
-            apiDiv.innerHTML = `<div class="status warning">🔄 Testing API connection...</div>`;
-            
-            fetch(`${apiUrl}/auth/user`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => {
-                if (response.status === 401) {
-                    apiDiv.innerHTML = `
-                        <div class="status success">✅ API is reachable</div>
-                        <p>URL: <code>${apiUrl}</code></p>
-                        <p>Status: 401 Unauthorized (expected without auth token)</p>
-                    `;
-                } else {
-                    apiDiv.innerHTML = `
-                        <div class="status warning">⚠️ API responded with status ${response.status}</div>
-                        <p>URL: <code>${apiUrl}</code></p>
-                    `;
-                }
-            })
-            .catch(error => {
-                apiDiv.innerHTML = `
-                    <div class="status error">❌ API connection failed</div>
-                    <p>URL: <code>${apiUrl}</code></p>
-                    <p>Error: ${error.message}</p>
-                `;
-            });
-        } else {
-            apiDiv.innerHTML = `
-                <div class="status error">❌ API URL not configured</div>
-                <p>The environment variable <code>VITE_API_BASE_URL</code> is not set.</p>
-            `;
-        }
-        
-        // Add build info
-        document.body.innerHTML += `
-            <div class="debug-card">
-                <h2>Build Information</h2>
-                <p><strong>Built at:</strong> ${new Date().toISOString()}</p>
-                <p><strong>User Agent:</strong> ${navigator.userAgent}</p>
-                <p><strong>Location:</strong> ${window.location.href}</p>
-            </div>
-        `;
-    </script>
-</body>
-</html> 
+    <script>
+        // Auto-redirect after 3 seconds
+                 setTimeout(() => {
+             window.location.href = '/debug';
+         }, 3000);
+     </script>
+ </body>
+ </html> 

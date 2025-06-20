@@ -17,6 +17,7 @@ import CreateStepPage from './pages/CreateStepPage';
 import EditStepPage from './pages/EditStepPage';
 import EditUnitPage from './pages/EditUnitPage';
 import SettingsPage from './pages/SettingsPage';
+import DebugPage from './pages/DebugPage';
 
 export function App() {
   const [isStorageReady, setIsStorageReady] = useState(false);
@@ -82,6 +83,7 @@ export function App() {
           <Route path="/units/:unitId/steps/:stepId/edit" component={EditStepPage} />
           <Route path="/units/:id/edit" component={EditUnitPage} />
           <Route path="/settings" component={SettingsPage} />
+          <Route path="/debug" component={DebugPage} />
         </Router>
       </main>
     </div>
