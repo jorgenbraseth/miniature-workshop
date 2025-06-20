@@ -123,7 +123,21 @@ jobs:
         working-directory: ./backend
         run: |
           pnpm run deploy
-          echo "API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`HttpApiUrl`].OutputValue' --output text --region eu-west-1)" >> $GITHUB_OUTPUT
+          echo "🔍 Getting API URL from deployed stack..."
+          API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`HttpApiUrl`].OutputValue' --output text --region eu-west-1 2>/dev/null || echo "")
+          
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            echo "❌ HttpApiUrl not found, trying ApiEndpoint..."
+            API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' --output text --region eu-west-1 2>/dev/null || echo "")
+          fi
+          
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            echo "❌ Could not extract API URL from CloudFormation outputs"
+            exit 1
+          fi
+          
+          echo "✅ API URL: $API_URL"
+          echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           NODE_OPTIONS: '--max-old-space-size=4096'
@@ -151,7 +165,26 @@ jobs:
       - name: Get existing API URL
         id: get-url
         run: |
+          echo "🔍 Attempting to get API URL from CloudFormation..."
           API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`HttpApiUrl`].OutputValue' --output text --region eu-west-1 2>/dev/null || echo "")
+          
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            echo "❌ Could not get API URL from CloudFormation"
+            # Try alternative output key names
+            API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpoint`].OutputValue' --output text --region eu-west-1 2>/dev/null || echo "")
+            
+            if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+              echo "❌ Could not get API URL with alternative key either"
+              # Use a known working API URL as fallback
+              API_URL="https://bj1q3p3gvi.execute-api.eu-west-1.amazonaws.com"
+              echo "🔄 Using fallback API URL: $API_URL"
+            else
+              echo "✅ Found API URL with alternative key: $API_URL"
+            fi
+          else
+            echo "✅ Found API URL: $API_URL"
+          fi
+          
           echo "API_URL=$API_URL" >> $GITHUB_OUTPUT
 
   deploy-frontend:
@@ -187,6 +220,9 @@ jobs:
           echo "🔍 Environment Variables Check:"
           echo "API_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}"
           echo "GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID != '' && '✅ Set' || '❌ Not Set' }}"
+          echo "GOOGLE_CLIENT_ID available: ${{ secrets.GOOGLE_CLIENT_ID && 'YES' || 'NO' }}"
+          echo "Backend output: ${{ needs.deploy-backend.outputs.API_URL }}"
+          echo "Get-URL output: ${{ needs.get-api-url.outputs.API_URL }}"
           
       - name: Build frontend for production
         working-directory: ./frontend
