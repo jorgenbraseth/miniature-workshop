@@ -93,7 +93,7 @@ jobs:
         working-directory: ./backend
         run: |
           pnpm run deploy
-          echo "API_URL=$(serverless info --stage prod | grep 'HttpApiUrl' | awk '{print $2}')" >> $GITHUB_OUTPUT
+          echo "API_URL=$(aws cloudformation describe-stacks --stack-name miniature-workshop-backend-prod --query 'Stacks[0].Outputs[?OutputKey==`HttpApiUrl`].OutputValue' --output text --region eu-west-1)" >> $GITHUB_OUTPUT
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           NODE_OPTIONS: '--max-old-space-size=4096'
