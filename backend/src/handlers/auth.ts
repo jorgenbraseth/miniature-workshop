@@ -3,26 +3,8 @@ import { verifyGoogleToken, requireAuth } from '../utils/auth';
 import { getUser, getUserByEmail, createUser } from '../services/dynamodb';
 import { successResponse, errorResponse, serverErrorResponse, unauthorizedResponse } from '../utils/response';
 
-export const handler: APIGatewayProxyHandler = async (event) => {
-  const { httpMethod, path } = event;
-
-  try {
-    if (httpMethod === 'POST' && path === '/auth/verify') {
-      return await verifyToken(event);
-    }
-    
-    if (httpMethod === 'GET' && path === '/auth/user') {
-      return await getCurrentUser(event);
-    }
-
-    return errorResponse('Route not found', 404);
-  } catch (error) {
-    console.error('Auth handler error:', error);
-    return serverErrorResponse();
-  }
-};
-
-const verifyToken = async (event: any) => {
+// Export individual handlers for each endpoint
+export const verifyToken: APIGatewayProxyHandler = async (event) => {
   try {
     console.log('Auth verify request received');
     console.log('Event body:', event.body);
@@ -75,7 +57,7 @@ const verifyToken = async (event: any) => {
   }
 };
 
-const getCurrentUser = async (event: any) => {
+export const getCurrentUser: APIGatewayProxyHandler = async (event) => {
   try {
     const authHeader = event.headers.Authorization || event.headers.authorization;
     const authUser = await requireAuth(authHeader);
@@ -93,4 +75,6 @@ const getCurrentUser = async (event: any) => {
     console.error('Error getting current user:', error);
     return serverErrorResponse('Failed to get user');
   }
-}; 
+};
+
+ 

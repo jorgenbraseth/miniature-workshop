@@ -92,13 +92,18 @@ custom:
 
 functions:
   # Authentication
-  auth:
-    handler: src/handlers/auth.handler
+  verifyAuth:
+    handler: src/handlers/auth.verifyToken
     timeout: 25
     events:
       - httpApi:
           path: /auth/verify
           method: post
+  
+  getCurrentUser:
+    handler: src/handlers/auth.getCurrentUser
+    timeout: 25
+    events:
       - httpApi:
           path: /auth/user
           method: get
