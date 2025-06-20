@@ -6,7 +6,7 @@ provider:
   name: aws
   runtime: nodejs18.x
   stage: prod
-  region: ${opt:region, 'us-east-1'}
+  region: ${opt:region, 'eu-west-1'}
   memorySize: 256
   timeout: 25
   environment:
@@ -21,7 +21,7 @@ provider:
     cors:
       allowedOrigins:
         - http://localhost:5173
-        - https://*.vercel.app
+        - https://miniature-workshop.vercel.app/
         - https://miniature-workshop.com
       allowedHeaders:
         - Content-Type
