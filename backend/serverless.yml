@@ -55,7 +55,7 @@ provider:
             - s3:GetObjectAcl
             - s3:PutObjectAcl
           Resource:
-            - !Sub "${ImagesBucket}/*"
+            - !Sub "${ImagesBucket.Arn}/*"
         - Effect: Allow
           Action:
             - s3:ListBucket
