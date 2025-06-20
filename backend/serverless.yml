@@ -311,22 +311,6 @@ resources:
           RestrictPublicBuckets: true
 
   Outputs:
-    HttpApiId:
-      Value: !Ref HttpApi
-      Export:
-        Name: !Sub "${self:service}-prod-httpApiId"
-
-    HttpApiUrl:
-      Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
-      Export:
-        Name: !Sub "${self:service}-prod-httpApiUrl"
-
-    UnitsTableName:
-      Value: !Sub "${self:service}-prod-units"
-      Export:
-        Name: !Sub "${self:service}-prod-unitsTable"
-
-    ImagesBucketName:
-      Value: !Sub "${self:service}-prod-images"
-      Export:
-        Name: !Sub "${self:service}-prod-imagesBucket" 
+    ApiEndpoint:
+      Value:
+        Fn::Sub: "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com" 
