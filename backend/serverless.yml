@@ -11,7 +11,9 @@ provider:
   region: ${opt:region, 'eu-west-1'}
   memorySize: 256
   timeout: 25
-  disableDefaultOutputExportNames: true
+  logs:
+    httpApi: false
+    frameworkLambda: false
   environment:
     STAGE: ${self:provider.stage}
     REGION: ${self:provider.region}
@@ -71,15 +73,6 @@ provider:
             - s3:ListBucket
           Resource:
             - Fn::GetAtt: [ImagesBucket, Arn]
-        - Effect: Allow
-          Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            - logs:TagResource
-            - logs:UntagResource
-          Resource:
-            - Fn::Sub: 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*'
 
 
 package:
