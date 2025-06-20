@@ -8,6 +8,25 @@ on:
     branches:
       - main
   workflow_dispatch:  # Allows manual triggering
+    inputs:
+      deploy_backend:
+        description: 'Deploy backend'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'true'
+          - 'false'
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - 'auto'
+          - 'true'
+          - 'false'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -87,7 +106,14 @@ jobs:
   deploy-backend:
     needs: [changes, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.backend == 'true'
+    if: |
+      github.ref == 'refs/heads/main' && (
+        (github.event_name != 'workflow_dispatch' && needs.changes.outputs.backend == 'true') ||
+        (github.event_name == 'workflow_dispatch' && (
+          inputs.deploy_backend == 'true' || 
+          (inputs.deploy_backend == 'auto' && needs.changes.outputs.backend == 'true')
+        ))
+      )
     outputs:
       API_URL: ${{ steps.deploy.outputs.API_URL }}
     
@@ -150,7 +176,17 @@ jobs:
   get-api-url:
     needs: [changes, test]
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && needs.changes.outputs.frontend == 'true' && needs.changes.outputs.backend == 'false'
+    if: |
+      github.ref == 'refs/heads/main' && (
+        (github.event_name != 'workflow_dispatch' && needs.changes.outputs.frontend == 'true' && needs.changes.outputs.backend == 'false') ||
+        (github.event_name == 'workflow_dispatch' && (
+          inputs.deploy_frontend == 'true' || 
+          (inputs.deploy_frontend == 'auto' && needs.changes.outputs.frontend == 'true')
+        ) && !(
+          inputs.deploy_backend == 'true' || 
+          (inputs.deploy_backend == 'auto' && needs.changes.outputs.backend == 'true')
+        ))
+      )
     outputs:
       API_URL: ${{ steps.get-url.outputs.API_URL }}
     
@@ -193,7 +229,13 @@ jobs:
     if: |
       always() && 
       github.ref == 'refs/heads/main' && 
-      needs.changes.outputs.frontend == 'true' &&
+      (
+        (github.event_name != 'workflow_dispatch' && needs.changes.outputs.frontend == 'true') ||
+        (github.event_name == 'workflow_dispatch' && (
+          inputs.deploy_frontend == 'true' || 
+          (inputs.deploy_frontend == 'auto' && needs.changes.outputs.frontend == 'true')
+        ))
+      ) &&
       (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped') &&
       (needs.get-api-url.result == 'success' || needs.get-api-url.result == 'skipped')
     
