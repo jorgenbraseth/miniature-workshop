@@ -31,7 +31,7 @@ provider:
         - POST
         - PUT
         - DELETE
-        - OPTIONS
+                  - OPTIONS
   iam:
     role:
       statements:
@@ -43,11 +43,7 @@ provider:
             - dynamodb:PutItem
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
-          Resource:
-            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-units"
-            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-users"
-            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-sync-queue"
-            - "arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/${self:service}-prod-units/index/*"
+          Resource: "*"
         - Effect: Allow
           Action:
             - s3:GetObject
@@ -55,13 +51,8 @@ provider:
             - s3:DeleteObject
             - s3:GetObjectAcl
             - s3:PutObjectAcl
-          Resource:
-            - "arn:aws:s3:::${self:service}-prod-images/*"
-        - Effect: Allow
-          Action:
             - s3:ListBucket
-          Resource:
-            - "arn:aws:s3:::${self:service}-prod-images"
+          Resource: "*"
 
 package:
   individually: true
