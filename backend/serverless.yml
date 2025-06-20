@@ -48,6 +48,7 @@ provider:
             - !GetAtt UsersTable.Arn
             - !GetAtt SyncQueueTable.Arn
             - !Sub "${UnitsTable.Arn}/index/*"
+            - !Sub "${UsersTable.Arn}/index/EmailIndex"
             - !Sub "${UsersTable.Arn}/index/*"
             - !Sub "${SyncQueueTable.Arn}/index/*"
         - Effect: Allow
