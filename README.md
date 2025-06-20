@@ -20,21 +20,37 @@ Miniature Workshop is a comprehensive tool designed for Warhammer and tabletop m
 - AWS CLI configured (for backend deployment)
 - Serverless Framework CLI (`npm install -g serverless`)
 - Google Cloud Console project (for OAuth setup)
-- Vercel CLI (optional, for local testing)
+- Vercel CLI (for frontend deployment)
 
-### Installation
+### Deployment via GitHub Actions
+1. **Fork or clone this repository**
+2. **Set up GitHub Secrets** (Settings → Secrets and variables → Actions):
+   - `AWS_ACCESS_KEY_ID`: Your AWS access key
+   - `AWS_SECRET_ACCESS_KEY`: Your AWS secret key  
+   - `GOOGLE_CLIENT_ID`: Your Google OAuth client ID
+   - `API_BASE_URL`: Your API Gateway URL (after first deployment)
+   - `VERCEL_TOKEN`: Your Vercel deployment token
+   - `VERCEL_ORG_ID`: Your Vercel organization ID
+   - `VERCEL_PROJECT_ID`: Your Vercel project ID
+3. **Push to main branch** or manually trigger workflow to deploy
+
+### Manual Installation
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/miniature-workshop.git
-
-# Navigate to project directory
-cd miniature-workshop
-
-# Install dependencies
+# Install frontend dependencies
+cd frontend
 npm install
 
-# Start the development server
-npm run dev
+# Install backend dependencies
+cd ../backend
+npm install
+
+# Deploy backend
+npm run deploy
+
+# Deploy frontend
+cd ../frontend
+npm run build
+vercel --prod
 ```
 
 ## Domain Terminology

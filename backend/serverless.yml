@@ -1,0 +1,326 @@
+service: miniature-workshop-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: prod
+  region: ${opt:region, 'us-east-1'}
+  memorySize: 256
+  timeout: 30
+  environment:
+    STAGE: ${self:provider.stage}
+    REGION: ${self:provider.region}
+    UNITS_TABLE: ${self:service}-prod-units
+    USERS_TABLE: ${self:service}-prod-users
+    SYNC_QUEUE_TABLE: ${self:service}-prod-sync-queue
+    IMAGES_BUCKET: ${self:service}-prod-images
+    GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+  httpApi:
+    cors:
+      allowedOrigins:
+        - http://localhost:5173
+        - https://*.vercel.app
+        - https://miniature-workshop.com
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - Fn::GetAtt: [UnitsTable, Arn]
+            - Fn::GetAtt: [UsersTable, Arn]
+            - Fn::GetAtt: [SyncQueueTable, Arn]
+            - Fn::Join:
+                - '/'
+                - - Fn::GetAtt: [UnitsTable, Arn]
+                  - 'index/*'
+        - Effect: Allow
+          Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+            - s3:GetObjectAcl
+            - s3:PutObjectAcl
+          Resource:
+            - Fn::Join:
+                - ''
+                - - Fn::GetAtt: [ImagesBucket, Arn]
+                  - '/*'
+        - Effect: Allow
+          Action:
+            - s3:ListBucket
+          Resource:
+            - Fn::GetAtt: [ImagesBucket, Arn]
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+
+functions:
+  # Authentication
+  auth:
+    handler: src/handlers/auth.handler
+    events:
+      - httpApi:
+          path: /auth/verify
+          method: post
+      - httpApi:
+          path: /auth/user
+          method: get
+
+  # Units API
+  getUnits:
+    handler: src/handlers/units.getUnits
+    events:
+      - httpApi:
+          path: /units
+          method: get
+
+  getUnit:
+    handler: src/handlers/units.getUnit
+    events:
+      - httpApi:
+          path: /units/{id}
+          method: get
+
+  createUnit:
+    handler: src/handlers/units.createUnit
+    events:
+      - httpApi:
+          path: /units
+          method: post
+
+  updateUnit:
+    handler: src/handlers/units.updateUnit
+    events:
+      - httpApi:
+          path: /units/{id}
+          method: put
+
+  deleteUnit:
+    handler: src/handlers/units.deleteUnit
+    events:
+      - httpApi:
+          path: /units/{id}
+          method: delete
+
+  # Steps API
+  createStep:
+    handler: src/handlers/steps.createStep
+    events:
+      - httpApi:
+          path: /units/{unitId}/steps
+          method: post
+
+  updateStep:
+    handler: src/handlers/steps.updateStep
+    events:
+      - httpApi:
+          path: /units/{unitId}/steps/{stepId}
+          method: put
+
+  deleteStep:
+    handler: src/handlers/steps.deleteStep
+    events:
+      - httpApi:
+          path: /units/{unitId}/steps/{stepId}
+          method: delete
+
+  # Images API
+  uploadImage:
+    handler: src/handlers/images.uploadImage
+    timeout: 60
+    memorySize: 512
+    events:
+      - httpApi:
+          path: /images/upload
+          method: post
+
+  getImageUploadUrl:
+    handler: src/handlers/images.getUploadUrl
+    events:
+      - httpApi:
+          path: /images/upload-url
+          method: post
+
+  # Sync API
+  syncData:
+    handler: src/handlers/sync.syncData
+    events:
+      - httpApi:
+          path: /sync
+          method: post
+
+  getSyncStatus:
+    handler: src/handlers/sync.getSyncStatus
+    events:
+      - httpApi:
+          path: /sync/status
+          method: get
+
+resources:
+  Resources:
+    # DynamoDB Tables
+    UnitsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.UNITS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: isPublic
+            AttributeType: S
+          - AttributeName: createdAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+          - IndexName: PublicIndex
+            KeySchema:
+              - AttributeName: isPublic
+                KeyType: HASH
+              - AttributeName: createdAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: EmailIndex
+            KeySchema:
+              - AttributeName: email
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+    SyncQueueTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.SYNC_QUEUE_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserTimestampIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+
+    # S3 Bucket for Images
+    ImagesBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:provider.environment.IMAGES_BUCKET}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders:
+                - '*'
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+              AllowedOrigins:
+                - '*'
+              MaxAge: 3000
+        PublicAccessBlockConfiguration:
+          BlockPublicAcls: false
+          BlockPublicPolicy: false
+          IgnorePublicAcls: false
+          RestrictPublicBuckets: false
+
+    ImagesBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ImagesBucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Principal: '*'
+              Action:
+                - s3:GetObject
+              Resource: !Sub '${ImagesBucket}/*'
+              Condition:
+                StringEquals:
+                  's3:ExistingObjectTag/public': 'true'
+
+  Outputs:
+    ApiGatewayRestApiId:
+      Value:
+        Ref: HttpApi
+      Export:
+        Name: ${self:service}-prod-restApiId
+
+    ApiGatewayRestApiRootResourceId:
+      Value:
+        Fn::GetAtt:
+          - HttpApi
+          - RootResourceId
+      Export:
+        Name: ${self:service}-prod-rootResourceId
+
+    UnitsTableName:
+      Value: ${self:provider.environment.UNITS_TABLE}
+      Export:
+        Name: ${self:service}-prod-unitsTable
+
+    ImagesBucketName:
+      Value: ${self:provider.environment.IMAGES_BUCKET}
+      Export:
+        Name: ${self:service}-prod-imagesBucket 
