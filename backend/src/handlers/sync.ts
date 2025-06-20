@@ -25,8 +25,9 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
           lastSyncAt: new Date().toISOString(),
         });
       } else {
-        // Create new unit
-        await createUnit({
+        // Create new unit with existing ID (from sync)
+        const { createUnitWithId } = await import('../services/dynamodb');
+        await createUnitWithId({
           ...unitData,
           userId,
           syncStatus: 'synced',

@@ -255,6 +255,32 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   }
 };
 
+export const createUnitWithId = async (unit: Unit): Promise<Unit> => {
+  const now = new Date().toISOString();
+  
+  const newUnit: Unit = {
+    ...unit,
+    createdAt: unit.createdAt || now,
+    updatedAt: now,
+  };
+
+  const dynamoItem = transformUnitToDynamoItem(newUnit);
+
+  try {
+    await docClient.send(
+      new PutCommand({
+        TableName: UNITS_TABLE,
+        Item: dynamoItem,
+      })
+    );
+
+    return newUnit;
+  } catch (error) {
+    console.error('Error creating unit with ID:', error);
+    throw error;
+  }
+};
+
 export const createUser = async (user: Omit<User, 'createdAt' | 'updatedAt'>): Promise<User> => {
   const now = new Date().toISOString();
   
