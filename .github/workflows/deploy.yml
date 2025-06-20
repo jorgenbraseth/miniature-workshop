@@ -60,6 +60,8 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    outputs:
+      API_URL: ${{ steps.deploy.outputs.API_URL }}
     
     steps:
       - name: Checkout code
@@ -129,7 +131,7 @@ jobs:
         working-directory: ./frontend
         run: pnpm run build
         env:
-          VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
 
       - name: Deploy to Vercel
