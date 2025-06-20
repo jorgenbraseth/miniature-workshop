@@ -318,8 +318,7 @@ resources:
         Name: ${self:service}-prod-httpApiId
 
     HttpApiUrl:
-      Value:
-        Fn::Sub: https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com
+      Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
       Export:
         Name: ${self:service}-prod-httpApiUrl
 
