@@ -312,22 +312,21 @@ resources:
 
   Outputs:
     HttpApiId:
-      Value:
-        Ref: HttpApi
+      Value: !Ref HttpApi
       Export:
-        Name: ${self:service}-prod-httpApiId
+        Name: !Sub "${self:service}-prod-httpApiId"
 
     HttpApiUrl:
       Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
       Export:
-        Name: ${self:service}-prod-httpApiUrl
+        Name: !Sub "${self:service}-prod-httpApiUrl"
 
     UnitsTableName:
-      Value: ${self:provider.environment.UNITS_TABLE}
+      Value: !Sub "${self:service}-prod-units"
       Export:
-        Name: ${self:service}-prod-unitsTable
+        Name: !Sub "${self:service}-prod-unitsTable"
 
     ImagesBucketName:
-      Value: ${self:provider.environment.IMAGES_BUCKET}
+      Value: !Sub "${self:service}-prod-images"
       Export:
-        Name: ${self:service}-prod-imagesBucket 
+        Name: !Sub "${self:service}-prod-imagesBucket" 
