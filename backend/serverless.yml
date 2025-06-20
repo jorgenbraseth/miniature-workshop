@@ -258,7 +258,7 @@ resources:
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
-          - AttributeName: email
+          - AttributeName: GSI1PK
             AttributeType: S
         KeySchema:
           - AttributeName: id
@@ -266,7 +266,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: EmailIndex
             KeySchema:
-              - AttributeName: email
+              - AttributeName: GSI1PK
                 KeyType: HASH
             Projection:
               ProjectionType: ALL
