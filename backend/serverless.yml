@@ -21,7 +21,7 @@ provider:
     cors:
       allowedOrigins:
         - http://localhost:5173
-        - https://miniature-workshop.vercel.app/
+        - https://miniature-workshop.vercel.app
         - https://miniature-workshop.com
       allowedHeaders:
         - Content-Type
@@ -31,6 +31,7 @@ provider:
         - POST
         - PUT
         - DELETE
+        - OPTIONS
   iam:
     role:
       statements:
