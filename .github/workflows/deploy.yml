@@ -215,6 +215,16 @@ jobs:
         working-directory: ./frontend
         run: pnpm install --frozen-lockfile
 
+      - name: Create production environment file
+        working-directory: ./frontend
+        run: |
+          echo "🔧 Creating .env.production file..."
+          echo "VITE_API_BASE_URL=${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}" > .env.production
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env.production
+          echo "📄 Contents of .env.production:"
+          cat .env.production
+          echo "✅ Environment file created"
+
       - name: Debug environment variables
         run: |
           echo "🔍 Environment Variables Check:"
@@ -235,16 +245,31 @@ jobs:
         working-directory: ./frontend
         run: |
           echo "🔍 Checking if environment variables are in built files:"
+          echo "📁 Built files:"
+          ls -la dist/assets/
+          echo ""
+          
+          echo "🔍 Searching for environment variable names (should NOT be found):"
           if grep -r "VITE_GOOGLE_CLIENT_ID" dist/ 2>/dev/null; then
             echo "❌ Environment variable names found in build (should be replaced with values)"
           else
             echo "✅ Environment variable names not found (good - they were replaced)"
           fi
           
-          if grep -r "apps.googleusercontent.com" dist/ 2>/dev/null; then
+          echo ""
+          echo "🔍 Searching for Google Client ID pattern:"
+          if grep -r "apps\.googleusercontent\.com" dist/ 2>/dev/null; then
             echo "✅ Google Client ID found in build"
           else
             echo "❌ Google Client ID not found in build"
+          fi
+          
+          echo ""
+          echo "🔍 Searching for API URL pattern:"
+          if grep -r "execute-api.*amazonaws\.com" dist/ 2>/dev/null; then
+            echo "✅ API URL found in build"
+          else
+            echo "❌ API URL not found in build"
           fi
 
       - name: Deploy to Vercel
