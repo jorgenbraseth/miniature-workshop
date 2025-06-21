@@ -123,6 +123,9 @@ class AuthService {
           isAuthenticated: true,
           isLoading: false
         });
+
+        // Trigger initial sync to download user's data
+        this.triggerInitialSync();
       } else {
         throw new Error(data.error || 'Authentication failed');
       }
@@ -212,6 +215,15 @@ class AuthService {
 
   getAuthHeader(): string | null {
     return this.authState.token ? `Bearer ${this.authState.token}` : null;
+  }
+
+  private triggerInitialSync() {
+    // Import syncService dynamically to avoid circular dependency
+    import('./sync').then(({ syncService }) => {
+      syncService.initialSync().catch(error => {
+        console.error('Initial sync failed:', error);
+      });
+    });
   }
 
   subscribe(listener: (state: AuthState) => void): () => void {

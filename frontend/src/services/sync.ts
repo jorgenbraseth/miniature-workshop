@@ -1,4 +1,4 @@
-import { SyncQueueItem } from '../types';
+import { SyncQueueItem, Unit } from '../types';
 import { authService } from './auth';
 import { storageService } from './storage';
 
@@ -74,42 +74,41 @@ class SyncService {
     try {
       this.updateSyncStatus({ isSyncing: true });
 
+      // Step 1: Sync up (upload local changes to server)
       const syncQueue = await storageService.getSyncQueue();
-      if (syncQueue.length === 0) {
-        this.updateSyncStatus({ 
-          isSyncing: false,
-          pendingItems: 0,
-          lastSyncAt: new Date()
-        });
-        return;
-      }
-
-      console.log(`Syncing ${syncQueue.length} items...`);
-      this.updateSyncStatus({ pendingItems: syncQueue.length });
-
-      // Process sync items in batches
-      const batchSize = 10;
       let processedCount = 0;
       let failedCount = 0;
 
-      for (let i = 0; i < syncQueue.length; i += batchSize) {
-        const batch = syncQueue.slice(i, i + batchSize);
-        
-        try {
-          const result = await this.syncBatch(batch, authState.token!);
-          processedCount += result.processed;
-          failedCount += result.failed.length;
+      if (syncQueue.length > 0) {
+        console.log(`Syncing up ${syncQueue.length} items...`);
+        this.updateSyncStatus({ pendingItems: syncQueue.length });
 
-          // Remove successfully processed items from queue
-          await this.removeProcessedItems(batch, result.failed);
-        } catch (error) {
-          console.error('Batch sync failed:', error);
-          failedCount += batch.length;
+        // Process sync items in batches
+        const batchSize = 10;
+
+        for (let i = 0; i < syncQueue.length; i += batchSize) {
+          const batch = syncQueue.slice(i, i + batchSize);
           
-          // Increment retry count for failed items
-          await this.incrementRetryCount(batch);
+          try {
+            const result = await this.syncBatch(batch, authState.token!);
+            processedCount += result.processed;
+            failedCount += result.failed.length;
+
+            // Remove successfully processed items from queue
+            await this.removeProcessedItems(batch, result.failed);
+          } catch (error) {
+            console.error('Batch sync failed:', error);
+            failedCount += batch.length;
+            
+            // Increment retry count for failed items
+            await this.incrementRetryCount(batch);
+          }
         }
       }
+
+      // Step 2: Sync down (download server data to local)
+      console.log('Syncing down units from server...');
+      await this.syncDownUnits(authState.token!);
 
       this.updateSyncStatus({
         isSyncing: false,
@@ -118,7 +117,7 @@ class SyncService {
         failedItems: failedCount
       });
 
-      console.log(`Sync completed: ${processedCount} processed, ${failedCount} failed`);
+      console.log(`Sync completed: ${processedCount} uploaded, ${failedCount} failed`);
 
       // Schedule retry for failed items
       if (failedCount > 0) {
@@ -182,6 +181,69 @@ class SyncService {
     await storageService.removeSyncQueueItem(itemId);
   }
 
+  private async syncDownUnits(token: string): Promise<void> {
+    try {
+      // Fetch all user units from the server
+      const response = await fetch(`${API_BASE_URL}/units?scope=user&limit=100`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch units: ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to fetch units');
+      }
+
+      const serverUnits: Unit[] = result.data.units;
+      console.log(`Downloaded ${serverUnits.length} units from server`);
+
+      // Get local units
+      const localUnits = await storageService.getAllUnits();
+      const localUnitsMap = new Map(localUnits.map(unit => [unit.id, unit]));
+
+      let mergedCount = 0;
+      let updatedCount = 0;
+
+      for (const serverUnit of serverUnits) {
+        const localUnit = localUnitsMap.get(serverUnit.id);
+
+        if (!localUnit) {
+          // Unit doesn't exist locally, add it
+          await storageService.saveUnit({
+            ...serverUnit,
+            syncStatus: 'synced' as const
+          });
+          mergedCount++;
+        } else {
+          // Unit exists locally, check if server version is newer
+          const serverUpdatedAt = new Date(serverUnit.updatedAt);
+          const localUpdatedAt = new Date(localUnit.updatedAt);
+
+          if (serverUpdatedAt > localUpdatedAt) {
+            // Server version is newer, update local
+            await storageService.saveUnit({
+              ...serverUnit,
+              syncStatus: 'synced' as const
+            });
+            updatedCount++;
+          }
+          // If local version is newer or same, keep local version
+        }
+      }
+
+      console.log(`Sync down completed: ${mergedCount} new units, ${updatedCount} updated units`);
+    } catch (error) {
+      console.error('Error syncing down units:', error);
+      // Don't throw here, as we don't want sync-down errors to break the entire sync
+    }
+  }
+
   private scheduleRetry() {
     if (this.retryTimeout) {
       clearTimeout(this.retryTimeout);
@@ -198,6 +260,12 @@ class SyncService {
 
   async forcSync(): Promise<void> {
     console.log('Force sync triggered');
+    await this.triggerSync();
+  }
+
+  async initialSync(): Promise<void> {
+    console.log('Initial sync triggered (login)');
+    // Force a sync immediately when user logs in to get their data
     await this.triggerSync();
   }
 
