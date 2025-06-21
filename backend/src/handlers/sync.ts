@@ -17,11 +17,17 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
       // Check if unit already exists
       const existingUnit = await getUnit(unitData.id);
       if (existingUnit) {
-        // Unit exists, update it instead
-        // Exclude createdAt and id from updates to avoid GSI path conflicts
-        const { id, createdAt, ...updateData } = unitData;
+        // Unit exists, update it instead - only update specific fields
         await updateUnit(unitData.id, {
-          ...updateData,
+          name: unitData.name,
+          description: unitData.description,
+          gameSystem: unitData.gameSystem,
+          faction: unitData.faction,
+          modelCount: unitData.modelCount,
+          steps: unitData.steps,
+          isComplete: unitData.isComplete,
+          thumbnailPhotoId: unitData.thumbnailPhotoId,
+          isPublic: unitData.isPublic,
           userId,
           syncStatus: 'synced',
           lastSyncAt: new Date().toISOString(),
@@ -30,7 +36,18 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
         // Create new unit with existing ID (from sync)
         const { createUnitWithId } = await import('../services/dynamodb');
         await createUnitWithId({
-          ...unitData,
+          id: unitData.id,
+          name: unitData.name,
+          description: unitData.description,
+          gameSystem: unitData.gameSystem,
+          faction: unitData.faction,
+          modelCount: unitData.modelCount,
+          steps: unitData.steps,
+          isComplete: unitData.isComplete,
+          thumbnailPhotoId: unitData.thumbnailPhotoId,
+          isPublic: unitData.isPublic,
+          createdAt: unitData.createdAt,
+          updatedAt: unitData.updatedAt,
           userId,
           syncStatus: 'synced',
         });
@@ -38,10 +55,17 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
       break;
 
     case 'update':
-      // Exclude createdAt and id from updates to avoid GSI path conflicts
-      const { id, createdAt, ...updateData } = unitData;
+      // Only update specific fields to avoid path conflicts
       await updateUnit(unitData.id, {
-        ...updateData,
+        name: unitData.name,
+        description: unitData.description,
+        gameSystem: unitData.gameSystem,
+        faction: unitData.faction,
+        modelCount: unitData.modelCount,
+        steps: unitData.steps,
+        isComplete: unitData.isComplete,
+        thumbnailPhotoId: unitData.thumbnailPhotoId,
+        isPublic: unitData.isPublic,
         userId,
         syncStatus: 'synced',
         lastSyncAt: new Date().toISOString(),
