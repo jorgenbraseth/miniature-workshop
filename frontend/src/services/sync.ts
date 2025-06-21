@@ -217,14 +217,19 @@ class SyncService {
       let updatedCount = 0;
 
       for (const serverUnit of serverUnits) {
+        // Convert date strings to Date objects
+        const normalizedServerUnit: Unit = {
+          ...serverUnit,
+          createdAt: new Date(serverUnit.createdAt),
+          updatedAt: new Date(serverUnit.updatedAt),
+          syncStatus: 'synced' as const
+        };
+
         const localUnit = localUnitsMap.get(serverUnit.id);
 
         if (!localUnit) {
           // Unit doesn't exist locally, add it
-          await storageService.saveUnitToStorage({
-            ...serverUnit,
-            syncStatus: 'synced' as const
-          });
+          await storageService.saveUnitToStorage(normalizedServerUnit);
           mergedCount++;
         } else {
           // Unit exists locally, check if server version is newer
@@ -233,10 +238,7 @@ class SyncService {
 
           if (serverUpdatedAt > localUpdatedAt) {
             // Server version is newer, update local
-            await storageService.saveUnitToStorage({
-              ...serverUnit,
-              syncStatus: 'synced' as const
-            });
+            await storageService.saveUnitToStorage(normalizedServerUnit);
             updatedCount++;
           }
           // If local version is newer or same, keep local version
