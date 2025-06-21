@@ -51,7 +51,7 @@ export const getUserUnits = async (userId: string, limit = 50, nextToken?: strin
       new QueryCommand({
         TableName: UNITS_TABLE,
         IndexName: 'UserIndex',
-        KeyConditionExpression: 'GSI1PK = :userId',
+        KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
           ':userId': userId,
         },
