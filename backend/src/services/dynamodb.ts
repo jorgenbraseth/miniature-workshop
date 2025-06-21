@@ -160,12 +160,10 @@ export const updateUnit = async (id: string, updates: Partial<Unit>): Promise<Un
     expressionAttributeValues[':GSI1SK'] = updates.createdAt || now;
   }
 
+  // Handle isPublic conversion to string (no GSI2 fields since PublicIndex uses isPublic directly)
   if (updates.isPublic !== undefined) {
-    updateExpressions.push('#GSI2PK = :GSI2PK', '#GSI2SK = :GSI2SK');
-    expressionAttributeNames['#GSI2PK'] = 'GSI2PK';
-    expressionAttributeNames['#GSI2SK'] = 'GSI2SK';
-    expressionAttributeValues[':GSI2PK'] = updates.isPublic.toString();
-    expressionAttributeValues[':GSI2SK'] = updates.createdAt || now;
+    // Override the isPublic value to be a string instead of boolean
+    expressionAttributeValues[':isPublic'] = updates.isPublic.toString();
   }
 
   // Always update updatedAt
