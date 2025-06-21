@@ -153,11 +153,16 @@ export const updateUnit = async (id: string, updates: Partial<Unit>): Promise<Un
 
   // Handle GSI fields that need special formatting
   if (updates.userId !== undefined) {
-    updateExpressions.push('#GSI1PK = :GSI1PK', '#GSI1SK = :GSI1SK');
+    updateExpressions.push('#GSI1PK = :GSI1PK');
     expressionAttributeNames['#GSI1PK'] = 'GSI1PK';
-    expressionAttributeNames['#GSI1SK'] = 'GSI1SK';
     expressionAttributeValues[':GSI1PK'] = updates.userId;
-    expressionAttributeValues[':GSI1SK'] = updates.createdAt || now;
+    
+    // Only update GSI1SK if createdAt is explicitly being updated
+    if (updates.createdAt !== undefined) {
+      updateExpressions.push('#GSI1SK = :GSI1SK');
+      expressionAttributeNames['#GSI1SK'] = 'GSI1SK';
+      expressionAttributeValues[':GSI1SK'] = updates.createdAt;
+    }
   }
 
   // Handle isPublic conversion to string (no GSI2 fields since PublicIndex uses isPublic directly)
