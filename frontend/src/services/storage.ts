@@ -188,7 +188,10 @@ class StorageService {
       ...unit,
       isComplete: unit.isComplete ?? false, // Default to false if not present
       modelCount: unit.modelCount ?? (unit.models ? unit.models.length : 1), // Migrate from models array or default to 1
-      thumbnailPhotoId: unit.thumbnailPhotoId ?? undefined // Ensure thumbnailPhotoId field exists
+      thumbnailPhotoId: unit.thumbnailPhotoId ?? undefined, // Ensure thumbnailPhotoId field exists
+      // Ensure dates are always Date objects, not strings
+      createdAt: unit.createdAt instanceof Date ? unit.createdAt : new Date(unit.createdAt),
+      updatedAt: unit.updatedAt instanceof Date ? unit.updatedAt : new Date(unit.updatedAt)
     };
   }
 
