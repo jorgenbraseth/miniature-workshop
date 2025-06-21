@@ -82,7 +82,7 @@ export const getPublicUnits = async (limit = 50, nextToken?: string): Promise<{
       new QueryCommand({
         TableName: UNITS_TABLE,
         IndexName: 'PublicIndex',
-        KeyConditionExpression: 'GSI2PK = :isPublic',
+        KeyConditionExpression: 'isPublic = :isPublic',
         ExpressionAttributeValues: {
           ':isPublic': 'true',
         },
