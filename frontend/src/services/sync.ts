@@ -160,6 +160,27 @@ class SyncService {
   }
 
   private async syncBatch(items: SyncQueueItem[], token: string) {
+    // Debug: Log what we're sending to the server
+    console.log(`Syncing batch of ${items.length} items:`);
+    items.forEach(item => {
+      if (item.type === 'unit') {
+        const unitData = item.data as Unit;
+        console.log(`  ${item.action} unit "${unitData.name}" with ${unitData.steps?.length || 0} steps`);
+        if (unitData.steps && unitData.steps.length > 0) {
+          unitData.steps.forEach((step, index) => {
+            console.log(`    Step ${index + 1}: "${step.description}" with ${step.photos?.length || 0} photos`);
+            // Check if photos have data
+            if (step.photos && step.photos.length > 0) {
+              step.photos.forEach((photo, photoIndex) => {
+                const dataSize = photo.opfsPath ? photo.opfsPath.length : 0;
+                console.log(`      Photo ${photoIndex + 1}: ${dataSize} chars (${Math.round(dataSize/1024)}KB)`);
+              });
+            }
+          });
+        }
+      }
+    });
+
     const response = await fetch(`${API_BASE_URL}/sync`, {
       method: 'POST',
       headers: {
@@ -176,6 +197,11 @@ class SyncService {
     const result = await response.json();
     if (!result.success) {
       throw new Error(result.error || 'Sync failed');
+    }
+
+    console.log(`Sync batch result: ${result.data.processed} processed, ${result.data.failed.length} failed`);
+    if (result.data.failed.length > 0) {
+      console.log('Failed items:', result.data.failed);
     }
 
     return result.data;
@@ -236,6 +262,16 @@ class SyncService {
 
       const serverUnits: Unit[] = result.data.units;
       console.log(`Downloaded ${serverUnits.length} units from server`);
+      
+      // Debug: Log step data for each unit
+      serverUnits.forEach(unit => {
+        console.log(`Unit "${unit.name}" has ${unit.steps?.length || 0} steps:`, unit.steps);
+        if (unit.steps && unit.steps.length > 0) {
+          unit.steps.forEach((step, index) => {
+            console.log(`  Step ${index + 1}: "${step.description}" with ${step.photos?.length || 0} photos`);
+          });
+        }
+      });
 
       // Get local units
       const localUnits = await storageService.getAllUnits();
@@ -268,6 +304,7 @@ class SyncService {
 
         if (!localUnit) {
           // Unit doesn't exist locally, add it
+          console.log(`Adding new unit "${serverUnit.name}" with ${serverUnit.steps?.length || 0} steps`);
           await storageService.saveUnitToStorage(normalizedServerUnit);
           mergedCount++;
         } else {
@@ -277,8 +314,12 @@ class SyncService {
 
           if (serverUpdatedAt > localUpdatedAt) {
             // Server version is newer, update local
+            console.log(`Updating unit "${serverUnit.name}" - server version newer (${serverUpdatedAt} > ${localUpdatedAt})`);
+            console.log(`  Server unit has ${serverUnit.steps?.length || 0} steps, local had ${localUnit.steps?.length || 0} steps`);
             await storageService.saveUnitToStorage(normalizedServerUnit);
             updatedCount++;
+          } else {
+            console.log(`Keeping local version of "${serverUnit.name}" - local version newer or same`);
           }
           // If local version is newer or same, keep local version
         }

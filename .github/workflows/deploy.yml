@@ -267,6 +267,7 @@ jobs:
           echo "🔧 Creating .env.production file..."
           echo "VITE_API_BASE_URL=${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}" > .env.production
           echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env.production
+          echo "VITE_IMAGES_BUCKET=miniature-workshop-backend-prod-images" >> .env.production
           echo "📄 Contents of .env.production:"
           cat .env.production
           echo "✅ Environment file created"
@@ -286,6 +287,7 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          VITE_IMAGES_BUCKET: miniature-workshop-backend-prod-images
 
       - name: Verify build contains environment variables
         working-directory: ./frontend
@@ -331,6 +333,7 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.API_URL || needs.get-api-url.outputs.API_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          VITE_IMAGES_BUCKET: miniature-workshop-backend-prod-images
 
   # Summary job to show what was deployed
   deployment-summary:

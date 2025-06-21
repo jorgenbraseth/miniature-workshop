@@ -35,11 +35,12 @@ export interface Brush {
 
 export interface Photo {
   id: string;
-  opfsPath: string; // Path to file in Origin Private File System
+  opfsPath: string; // Path to file in Origin Private File System or S3 URL
   thumbnailPath: string; // Path to compressed thumbnail
   type: 'detail' | 'full_model' | 'unit_overview';
   description: string;
   timestamp: Date;
+  s3Key?: string; // S3 key for uploaded images
 }
 
 export interface Step {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import { route } from 'preact-router';
 import { storageService } from '../services/storage';
+import { authService } from '../services/auth';
 import { Unit, Step } from '../types';
 
 export default function EditStepPage({ unitId, stepId }: { unitId: string; stepId: string }) {
@@ -200,19 +201,91 @@ export default function EditStepPage({ unitId, stepId }: { unitId: string; stepI
       setSaving(true);
       setError(null);
 
-      // Process new images and create Photo objects
-      const baseTimestamp = Date.now();
+      // Upload new images to S3 and create Photo objects
       const newPhotos = await Promise.all(
         selectedImages.map(async (file, index) => {
-          const dataUrl = await createImageDataUrl(file);
-          return {
-            id: `${baseTimestamp}-${index}`, // Simple ID generation with unique timestamp
-            opfsPath: dataUrl,
-            thumbnailPath: dataUrl,
-            type: 'detail' as const,
-            description: `Step ${step.stepNumber} - Image ${existingPhotos.length + index + 1}`,
-            timestamp: new Date()
-          };
+          try {
+            // Get upload URL from backend
+            const authState = authService.getAuthState();
+            if (!authState.isAuthenticated || !authState.token) {
+              throw new Error('Not authenticated');
+            }
+
+            const uploadResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/images/upload-url`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authState.token}`,
+              },
+              body: JSON.stringify({
+                type: 'detail',
+                description: `Step ${step.stepNumber} - Image ${existingPhotos.length + index + 1}`,
+                isPublic: false,
+              }),
+            });
+
+            if (!uploadResponse.ok) {
+              throw new Error(`Failed to get upload URL: ${uploadResponse.status}`);
+            }
+
+            const uploadData = await uploadResponse.json();
+            if (!uploadData.success) {
+              throw new Error(uploadData.error || 'Failed to get upload URL');
+            }
+
+            // Upload image to S3
+            const s3Response = await fetch(uploadData.data.uploadUrl, {
+              method: 'PUT',
+              body: file,
+              headers: {
+                'Content-Type': 'image/jpeg',
+              },
+            });
+
+            if (!s3Response.ok) {
+              throw new Error(`Failed to upload image: ${s3Response.status}`);
+            }
+
+            // Store local copy in OPFS for offline access
+            let localPath = '';
+            try {
+              await storageService.savePhoto({
+                id: uploadData.data.imageId,
+                opfsPath: `images/${uploadData.data.imageId}.jpg`,
+                thumbnailPath: `thumbnails/${uploadData.data.imageId}.jpg`,
+                type: 'detail',
+                description: `Step ${step.stepNumber} - Image ${existingPhotos.length + index + 1}`,
+                timestamp: new Date()
+              }, file);
+              localPath = `images/${uploadData.data.imageId}.jpg`;
+            } catch (opfsError) {
+              console.warn('Failed to save to OPFS, using S3 URL only:', opfsError);
+                             // Construct S3 URL as fallback
+               localPath = `https://${import.meta.env.VITE_IMAGES_BUCKET}.s3.eu-west-1.amazonaws.com/${uploadData.data.s3Key}`;
+            }
+
+            return {
+              id: uploadData.data.imageId,
+              opfsPath: localPath, // Local OPFS path or S3 URL fallback
+              thumbnailPath: localPath, // Same for now
+              type: 'detail' as const,
+              description: `Step ${step.stepNumber} - Image ${existingPhotos.length + index + 1}`,
+              timestamp: new Date(),
+              s3Key: uploadData.data.s3Key, // Store S3 key for sync
+            };
+          } catch (uploadError) {
+            console.error('Failed to upload image:', uploadError);
+            // Fallback to data URL for offline use (temporary)
+            const dataUrl = await createImageDataUrl(file);
+            return {
+              id: `temp-${Date.now()}-${index}`,
+              opfsPath: dataUrl,
+              thumbnailPath: dataUrl,
+              type: 'detail' as const,
+              description: `Step ${step.stepNumber} - Image ${existingPhotos.length + index + 1} (offline)`,
+              timestamp: new Date(),
+            };
+          }
         })
       );
 

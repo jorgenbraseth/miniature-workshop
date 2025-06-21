@@ -10,6 +10,8 @@ export default function SettingsPage() {
   const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
   const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
   const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
+  const [cleaningUp, setCleaningUp] = useState(false);
+  const [cleanupResult, setCleanupResult] = useState<string | null>(null);
 
   useEffect(() => {
     const authUnsubscribe = authService.subscribe(setAuthState);
@@ -42,6 +44,20 @@ export default function SettingsPage() {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+  };
+
+  const cleanupLargeImages = async () => {
+    setCleaningUp(true);
+    setCleanupResult(null);
+    try {
+      const result = await storageService.cleanupLargeImages();
+      setCleanupResult(result);
+    } catch (error) {
+      console.error('Failed to clean up large images:', error);
+      setCleanupResult('Error: Failed to clean up large images');
+    } finally {
+      setCleaningUp(false);
+    }
   };
 
   return (
@@ -159,6 +175,39 @@ export default function SettingsPage() {
           <p><strong>Miniature Workshop</strong> - Document your painting journey</p>
           <p>Store your miniature painting progress with photos and notes</p>
           <p>Works offline, syncs when online</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="text-xl font-semibold text-workshop-900 mb-4 flex items-center">
+          <span class="mr-2">🔧</span>
+          Data Cleanup
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <h3 class="text-sm font-medium text-workshop-700 mb-2">
+              Fix Large Image Data
+            </h3>
+            <p class="text-sm text-workshop-600 mb-3">
+              If you're experiencing sync issues, you might have units with large embedded image data. 
+              This tool will identify and fix units that might be too large for the server.
+            </p>
+            <button
+              onClick={cleanupLargeImages}
+              disabled={cleaningUp}
+              class="btn-secondary"
+            >
+              {cleaningUp ? 'Cleaning...' : 'Check & Fix Large Images'}
+            </button>
+            {cleanupResult && (
+              <div class={`mt-2 p-2 rounded text-sm ${
+                cleanupResult.includes('Error') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
+              }`}>
+                {cleanupResult}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

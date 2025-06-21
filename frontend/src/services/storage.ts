@@ -425,6 +425,48 @@ class StorageService {
       console.error('Failed to trigger immediate sync:', error);
     });
   }
+
+  async cleanupLargeImages(): Promise<string> {
+    try {
+      const units = await this.getAllUnits();
+      let fixedCount = 0;
+      let totalIssues = 0;
+
+      for (const unit of units) {
+        let unitModified = false;
+        
+        for (const step of unit.steps) {
+          for (const photo of step.photos) {
+            // Check if photo has large data URL (base64 encoded image)
+            if (photo.opfsPath && photo.opfsPath.startsWith('data:image/')) {
+              totalIssues++;
+              
+              // Remove the large data URL and mark for re-upload
+              photo.opfsPath = `temp-removed-${photo.id}`;
+              photo.thumbnailPath = `temp-removed-${photo.id}`;
+              
+              unitModified = true;
+            }
+          }
+        }
+        
+        if (unitModified) {
+          // Update the unit with cleaned data
+          await this.saveUnit(unit);
+          fixedCount++;
+        }
+      }
+
+      if (totalIssues === 0) {
+        return 'No issues found. All units are clean.';
+      } else {
+        return `Fixed ${fixedCount} units with ${totalIssues} large image issues. You may need to re-add some photos.`;
+      }
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance
