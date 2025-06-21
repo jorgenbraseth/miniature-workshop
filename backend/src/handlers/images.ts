@@ -78,6 +78,7 @@ export const getUploadUrl: APIGatewayProxyHandler = async event => {
 export const uploadImage: APIGatewayProxyHandler = async event => {
   try {
     const authHeader = event.headers.Authorization || event.headers.authorization
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const authUser = await requireAuth(authHeader)
 
     // This endpoint would handle direct image upload

@@ -106,7 +106,7 @@ export interface SyncQueueItem {
   userId: string
   type: 'unit' | 'step' | 'photo'
   action: 'create' | 'update' | 'delete'
-  data: any
+  data: Unit | Step | Photo | { id: string }
   timestamp: string
   retryCount: number
   ttl: number // TTL for DynamoDB
@@ -179,7 +179,7 @@ export interface SyncDataResponse {
   }>
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string

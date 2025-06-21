@@ -197,7 +197,7 @@ export default function EditUnitPage({ id }: { id: string }) {
               class="input-field"
               value={formData.modelCount}
               onInput={e =>
-                handleInputChange('modelCount', parseInt((e.target as HTMLInputElement).value) || 1)
+                handleInputChange('modelCount', parseInt((e.target as HTMLInputElement).value, 10) || 1)
               }
             />
           </div>

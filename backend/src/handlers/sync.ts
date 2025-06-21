@@ -1,6 +1,6 @@
 import { APIGatewayProxyHandler } from 'aws-lambda'
 import { requireAuth } from '../utils/auth'
-import { getUserUnits, getUnit, createUnit, updateUnit, deleteUnit } from '../services/dynamodb'
+import { getUserUnits, getUnit, updateUnit, deleteUnit } from '../services/dynamodb'
 import {
   successResponse,
   errorResponse,

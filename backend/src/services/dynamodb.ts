@@ -6,9 +6,8 @@ import {
   UpdateCommand,
   DeleteCommand,
   QueryCommand,
-  ScanCommand,
 } from '@aws-sdk/lib-dynamodb'
-import { Unit, User, SyncQueueItem, UnitDynamoItem, UserDynamoItem } from '../types'
+import { Unit, User, UnitDynamoItem, UserDynamoItem } from '../types'
 import { v4 as uuidv4 } from 'uuid'
 
 const client = new DynamoDBClient({
@@ -19,7 +18,6 @@ const docClient = DynamoDBDocumentClient.from(client)
 
 const UNITS_TABLE = process.env.UNITS_TABLE!
 const USERS_TABLE = process.env.USERS_TABLE!
-const SYNC_QUEUE_TABLE = process.env.SYNC_QUEUE_TABLE!
 
 // Unit operations
 export const getUnit = async (id: string): Promise<Unit | null> => {
@@ -155,7 +153,7 @@ export const updateUnit = async (id: string, updates: Partial<Unit>): Promise<Un
   // Build update expression dynamically
   const updateExpressions: string[] = []
   const expressionAttributeNames: Record<string, string> = {}
-  const expressionAttributeValues: Record<string, any> = {}
+  const expressionAttributeValues: Record<string, unknown> = {}
 
   Object.entries(updates).forEach(([key, value]) => {
     if (key !== 'id' && key !== 'createdAt' && value !== undefined) {
@@ -339,7 +337,8 @@ const transformUnitToDynamoItem = (unit: Unit): UnitDynamoItem => {
 }
 
 const transformDynamoItemToUnit = (item: UnitDynamoItem): Unit => {
-  const { GSI1PK, GSI1SK, ...unitWithStringIsPublic } = item
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { GSI1PK: _GSI1PK, GSI1SK: _GSI1SK, ...unitWithStringIsPublic } = item
   return {
     ...unitWithStringIsPublic,
     // Convert string back to boolean for the API response
@@ -355,6 +354,7 @@ const transformUserToDynamoItem = (user: User): UserDynamoItem => {
 }
 
 const transformDynamoItemToUser = (item: UserDynamoItem): User => {
-  const { GSI1PK, ...user } = item
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { GSI1PK: _GSI1PK, ...user } = item
   return user
 }

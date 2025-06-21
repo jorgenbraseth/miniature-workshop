@@ -1,7 +1,7 @@
 import { APIGatewayProxyResult } from 'aws-lambda'
 import { ApiResponse } from '../types'
 
-export const createResponse = <T = any>(
+export const createResponse = <T = unknown>(
   statusCode: number,
   body: ApiResponse<T>,
   headers: Record<string, string> = {}
@@ -19,7 +19,7 @@ export const createResponse = <T = any>(
   }
 }
 
-export const successResponse = <T = any>(
+export const successResponse = <T = unknown>(
   data: T,
   message?: string,
   statusCode = 200
