@@ -18,8 +18,10 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
       const existingUnit = await getUnit(unitData.id);
       if (existingUnit) {
         // Unit exists, update it instead
+        // Exclude createdAt and id from updates to avoid GSI path conflicts
+        const { id, createdAt, ...updateData } = unitData;
         await updateUnit(unitData.id, {
-          ...unitData,
+          ...updateData,
           userId,
           syncStatus: 'synced',
           lastSyncAt: new Date().toISOString(),
@@ -36,8 +38,10 @@ const handleUnitSync = async (item: SyncQueueItem, userId: string): Promise<void
       break;
 
     case 'update':
+      // Exclude createdAt and id from updates to avoid GSI path conflicts
+      const { id, createdAt, ...updateData } = unitData;
       await updateUnit(unitData.id, {
-        ...unitData,
+        ...updateData,
         userId,
         syncStatus: 'synced',
         lastSyncAt: new Date().toISOString(),
