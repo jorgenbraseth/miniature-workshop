@@ -217,11 +217,22 @@ class SyncService {
       let updatedCount = 0;
 
       for (const serverUnit of serverUnits) {
-        // Convert date strings to Date objects
+        // Convert date strings to Date objects for unit and nested data
         const normalizedServerUnit: Unit = {
           ...serverUnit,
           createdAt: new Date(serverUnit.createdAt),
           updatedAt: new Date(serverUnit.updatedAt),
+          lastSyncAt: serverUnit.lastSyncAt ? new Date(serverUnit.lastSyncAt) : undefined,
+          // Convert step dates
+          steps: serverUnit.steps.map(step => ({
+            ...step,
+            timestamp: new Date(step.timestamp),
+            // Convert photo dates within each step
+            photos: step.photos.map(photo => ({
+              ...photo,
+              timestamp: new Date(photo.timestamp)
+            }))
+          })),
           syncStatus: 'synced' as const
         };
 

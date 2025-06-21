@@ -191,7 +191,17 @@ class StorageService {
       thumbnailPhotoId: unit.thumbnailPhotoId ?? undefined, // Ensure thumbnailPhotoId field exists
       // Ensure dates are always Date objects, not strings
       createdAt: unit.createdAt instanceof Date ? unit.createdAt : new Date(unit.createdAt),
-      updatedAt: unit.updatedAt instanceof Date ? unit.updatedAt : new Date(unit.updatedAt)
+      updatedAt: unit.updatedAt instanceof Date ? unit.updatedAt : new Date(unit.updatedAt),
+      lastSyncAt: unit.lastSyncAt ? (unit.lastSyncAt instanceof Date ? unit.lastSyncAt : new Date(unit.lastSyncAt)) : undefined,
+      // Ensure step and photo dates are also converted
+      steps: (unit.steps || []).map((step: any) => ({
+        ...step,
+        timestamp: step.timestamp instanceof Date ? step.timestamp : new Date(step.timestamp),
+        photos: (step.photos || []).map((photo: any) => ({
+          ...photo,
+          timestamp: photo.timestamp instanceof Date ? photo.timestamp : new Date(photo.timestamp)
+        }))
+      }))
     };
   }
 
