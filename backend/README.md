@@ -12,7 +12,7 @@ Built with AWS serverless architecture using:
 
 ## Prerequisites
 
-1. **Node.js** (version 18 or higher)
+1. **Node.js** (version 20 or higher)
 2. **AWS CLI** configured with appropriate credentials
 3. **Serverless Framework** CLI (`pnpm add -g serverless`)
 4. **Google Cloud Console** project with OAuth credentials

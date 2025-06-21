@@ -14,7 +14,7 @@ Miniature Workshop is a comprehensive tool designed for Warhammer and tabletop m
 ## Getting Started
 
 ### Prerequisites
-- Node.js (version 18 or higher)
+- Node.js (version 20 or higher)
 - pnpm package manager (`npm install -g pnpm`)
 - Modern web browser with camera support (for photo capture)
 - AWS CLI configured (for backend deployment)

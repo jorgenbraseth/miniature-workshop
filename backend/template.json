@@ -3,7 +3,7 @@
   "frameworkVersion": "3",
   "provider": {
     "name": "aws",
-    "runtime": "nodejs18.x",
+    "runtime": "nodejs20.x",
     "stage": "prod",
     "region": "eu-west-1",
     "memorySize": 256,
