@@ -2,7 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { route } from 'preact-router';
 import { storageService } from '../services/storage';
 import { authService } from '../services/auth';
-import { Unit, Step, Paint, Brush } from '../types';
+import { Unit, Step } from '../types';
 
 export default function CreateStepPage({ unitId }: { unitId: string }) {
   const [unit, setUnit] = useState<Unit | null>(null);
@@ -191,7 +191,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authState.token}`,
+                Authorization: `Bearer ${authState.token}`,
               },
               body: JSON.stringify({
                 type: 'detail',

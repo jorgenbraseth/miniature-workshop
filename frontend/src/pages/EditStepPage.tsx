@@ -215,7 +215,7 @@ export default function EditStepPage({ unitId, stepId }: { unitId: string; stepI
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authState.token}`,
+                Authorization: `Bearer ${authState.token}`,
               },
               body: JSON.stringify({
                 type: 'detail',
