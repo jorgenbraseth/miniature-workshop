@@ -10,6 +10,7 @@ export interface SyncStatus {
   lastSyncAt: Date | null;
   pendingItems: number;
   failedItems: number;
+  immediateSyncPending: boolean;
 }
 
 class SyncService {
@@ -18,12 +19,14 @@ class SyncService {
     isSyncing: false,
     lastSyncAt: null,
     pendingItems: 0,
-    failedItems: 0
+    failedItems: 0,
+    immediateSyncPending: false
   };
 
   private listeners: ((status: SyncStatus) => void)[] = [];
   private syncInterval: number | null = null;
   private retryTimeout: number | null = null;
+  private immediateSyncTimeout: number | null = null;
 
   constructor() {
     this.setupOnlineListeners();
@@ -52,12 +55,31 @@ class SyncService {
   }
 
   private startPeriodicSync() {
-    // Sync every 30 seconds when online and authenticated
+    // Sync every 2 minutes as backup (reduced from 30 seconds since we have immediate sync)
     this.syncInterval = window.setInterval(() => {
       if (this.syncStatus.isOnline && authService.getAuthState().isAuthenticated) {
         this.triggerSync();
       }
-    }, 30000);
+    }, 120000); // 2 minutes
+  }
+
+  // New method for immediate sync with debouncing
+  triggerImmediateSync(): void {
+    // Clear any existing immediate sync timeout
+    if (this.immediateSyncTimeout) {
+      clearTimeout(this.immediateSyncTimeout);
+    }
+
+    // Set immediate sync pending status
+    this.updateSyncStatus({ immediateSyncPending: true });
+
+    // Debounce immediate syncs to avoid too many requests
+    // Wait 2 seconds after the last change before syncing
+    this.immediateSyncTimeout = window.setTimeout(() => {
+      console.log('Immediate sync triggered after local change');
+      this.updateSyncStatus({ immediateSyncPending: false });
+      this.triggerSync();
+    }, 2000);
   }
 
   async triggerSync(): Promise<void> {
@@ -72,7 +94,10 @@ class SyncService {
     }
 
     try {
-      this.updateSyncStatus({ isSyncing: true });
+      this.updateSyncStatus({ 
+        isSyncing: true,
+        immediateSyncPending: false // Clear immediate sync pending when actual sync starts
+      });
 
       // Step 1: Sync up (upload local changes to server)
       const syncQueue = await storageService.getSyncQueue();
@@ -126,7 +151,10 @@ class SyncService {
 
     } catch (error) {
       console.error('Sync error:', error);
-      this.updateSyncStatus({ isSyncing: false });
+      this.updateSyncStatus({ 
+        isSyncing: false,
+        immediateSyncPending: false 
+      });
       this.scheduleRetry();
     }
   }
@@ -308,6 +336,9 @@ class SyncService {
     }
     if (this.retryTimeout) {
       clearTimeout(this.retryTimeout);
+    }
+    if (this.immediateSyncTimeout) {
+      clearTimeout(this.immediateSyncTimeout);
     }
     window.removeEventListener('online', this.handleOnline.bind(this));
     window.removeEventListener('offline', this.handleOffline.bind(this));

@@ -100,6 +100,9 @@ class StorageService {
       timestamp: new Date(),
       retryCount: 0
     });
+
+    // Trigger immediate sync
+    this.triggerImmediateSync();
   }
 
   async saveUnitToStorage(unit: Unit): Promise<void> {
@@ -180,6 +183,9 @@ class StorageService {
       timestamp: new Date(),
       retryCount: 0
     });
+
+    // Trigger immediate sync
+    this.triggerImmediateSync();
   }
 
   // Migration helper to ensure all units have the required fields
@@ -407,6 +413,16 @@ class StorageService {
       const request = store.getAll();
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
+    });
+  }
+
+  // Helper method to trigger immediate sync
+  private triggerImmediateSync(): void {
+    // Import syncService dynamically to avoid circular dependency
+    import('./sync').then(({ syncService }) => {
+      syncService.triggerImmediateSync();
+    }).catch(error => {
+      console.error('Failed to trigger immediate sync:', error);
     });
   }
 }

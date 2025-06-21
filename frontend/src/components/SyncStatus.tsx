@@ -16,6 +16,7 @@ export default function SyncStatusComponent() {
   const getStatusColor = () => {
     if (!syncStatus.isOnline) return 'text-gray-500';
     if (syncStatus.isSyncing) return 'text-blue-500';
+    if (syncStatus.immediateSyncPending) return 'text-blue-400';
     if (syncStatus.failedItems > 0) return 'text-red-500';
     if (syncStatus.pendingItems > 0) return 'text-yellow-500';
     return 'text-green-500';
@@ -24,6 +25,7 @@ export default function SyncStatusComponent() {
   const getStatusIcon = () => {
     if (!syncStatus.isOnline) return '📴';
     if (syncStatus.isSyncing) return '🔄';
+    if (syncStatus.immediateSyncPending) return '⏱️';
     if (syncStatus.failedItems > 0) return '⚠️';
     if (syncStatus.pendingItems > 0) return '⏳';
     return '✅';
@@ -32,6 +34,7 @@ export default function SyncStatusComponent() {
   const getStatusText = () => {
     if (!syncStatus.isOnline) return 'Offline';
     if (syncStatus.isSyncing) return 'Syncing...';
+    if (syncStatus.immediateSyncPending) return 'Sync pending...';
     if (syncStatus.failedItems > 0) return `${syncStatus.failedItems} failed`;
     if (syncStatus.pendingItems > 0) return `${syncStatus.pendingItems} pending`;
     return 'Synced';
