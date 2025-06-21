@@ -157,9 +157,15 @@ class SyncService {
     const failedIds = new Set(failed.map(f => f.item.id));
     const successfulItems = batch.filter(item => !failedIds.has(item.id));
 
-    // Remove successful items from sync queue
+    // Remove successful items from sync queue and update their sync status
     for (const item of successfulItems) {
       await this.removeFromSyncQueue(item.id);
+      
+      // Update the unit's sync status to 'synced'
+      if (item.type === 'unit' && (item.action === 'create' || item.action === 'update')) {
+        const unitData = item.data as Unit;
+        await storageService.updateUnitSyncStatus(unitData.id, 'synced');
+      }
     }
   }
 
@@ -215,7 +221,7 @@ class SyncService {
 
         if (!localUnit) {
           // Unit doesn't exist locally, add it
-          await storageService.saveUnit({
+          await storageService.saveUnitToStorage({
             ...serverUnit,
             syncStatus: 'synced' as const
           });
@@ -227,7 +233,7 @@ class SyncService {
 
           if (serverUpdatedAt > localUpdatedAt) {
             // Server version is newer, update local
-            await storageService.saveUnit({
+            await storageService.saveUnitToStorage({
               ...serverUnit,
               syncStatus: 'synced' as const
             });

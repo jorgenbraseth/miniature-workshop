@@ -70,6 +70,12 @@
               },
               {
                 "Fn::Sub": "${UnitsTable.Arn}/index/*"
+              },
+              {
+                "Fn::Sub": "${UsersTable.Arn}/index/*"
+              },
+              {
+                "Fn::Sub": "${SyncQueueTable.Arn}/index/*"
               }
             ]
           },

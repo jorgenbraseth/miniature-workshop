@@ -89,6 +89,20 @@ class StorageService {
 
   // Unit operations
   async saveUnit(unit: Unit): Promise<void> {
+    await this.saveUnitToStorage(unit);
+
+    // Add to sync queue
+    await this.addToSyncQueue({
+      id: `unit-${unit.id}-${Date.now()}`,
+      type: 'unit',
+      action: 'create',
+      data: unit,
+      timestamp: new Date(),
+      retryCount: 0
+    });
+  }
+
+  async saveUnitToStorage(unit: Unit): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 
     const transaction = this.db.transaction([STORES.UNITS], 'readwrite');
@@ -99,15 +113,17 @@ class StorageService {
       request.onsuccess = () => resolve();
       request.onerror = () => reject(request.error);
     });
+  }
 
-    // Add to sync queue
-    await this.addToSyncQueue({
-      id: `unit-${unit.id}-${Date.now()}`,
-      type: 'unit',
-      action: 'create',
-      data: unit,
-      timestamp: new Date(),
-      retryCount: 0
+  async updateUnitSyncStatus(unitId: string, syncStatus: Unit['syncStatus']): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    const unit = await this.getUnit(unitId);
+    if (!unit) return;
+
+    await this.saveUnitToStorage({
+      ...unit,
+      syncStatus
     });
   }
 
