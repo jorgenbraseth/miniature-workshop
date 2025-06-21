@@ -464,7 +464,7 @@ class StorageService {
       if (totalIssues === 0) {
         return 'No issues found. All units are clean.'
       }
-      
+
       return `Fixed ${fixedCount} units with ${totalIssues} large image issues. You may need to re-add some photos.`
     } catch (error) {
       console.error('Error during cleanup:', error)
