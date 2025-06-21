@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.build/
+.serverless/
+
+# Environment files
+.env*
+
+# Generated files
+*.min.js
+
+# Other
+coverage/
+.nyc_output/ 

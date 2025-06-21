@@ -24,16 +24,8 @@
           "https://miniature-workshop.vercel.app/",
           "https://miniature-workshop.com"
         ],
-        "allowedHeaders": [
-          "Content-Type",
-          "Authorization"
-        ],
-        "allowedMethods": [
-          "GET",
-          "POST",
-          "PUT",
-          "DELETE"
-        ]
+        "allowedHeaders": ["Content-Type", "Authorization"],
+        "allowedMethods": ["GET", "POST", "PUT", "DELETE"]
       }
     },
     "iam": {
@@ -51,22 +43,13 @@
             ],
             "Resource": [
               {
-                "Fn::GetAtt": [
-                  "UnitsTable",
-                  "Arn"
-                ]
+                "Fn::GetAtt": ["UnitsTable", "Arn"]
               },
               {
-                "Fn::GetAtt": [
-                  "UsersTable",
-                  "Arn"
-                ]
+                "Fn::GetAtt": ["UsersTable", "Arn"]
               },
               {
-                "Fn::GetAtt": [
-                  "SyncQueueTable",
-                  "Arn"
-                ]
+                "Fn::GetAtt": ["SyncQueueTable", "Arn"]
               },
               {
                 "Fn::Sub": "${UnitsTable.Arn}/index/*"
@@ -96,25 +79,16 @@
           },
           {
             "Effect": "Allow",
-            "Action": [
-              "s3:ListBucket"
-            ],
+            "Action": ["s3:ListBucket"],
             "Resource": [
               {
-                "Fn::GetAtt": [
-                  "ImagesBucket",
-                  "Arn"
-                ]
+                "Fn::GetAtt": ["ImagesBucket", "Arn"]
               }
             ]
           },
           {
             "Effect": "Allow",
-            "Action": [
-              "logs:CreateLogGroup",
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-            ],
+            "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
             "Resource": [
               {
                 "Fn::Sub": "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/miniature-workshop-backend-prod-*"
@@ -141,10 +115,7 @@
     ],
     "artifactsS3KeyDirname": "serverless/miniature-workshop-backend/prod/code-artifacts"
   },
-  "plugins": [
-    "serverless-plugin-typescript",
-    "serverless-offline"
-  ],
+  "plugins": ["serverless-plugin-typescript", "serverless-offline"],
   "functions": {
     "auth": {
       "handler": "src/handlers/auth.handler",
@@ -483,18 +454,9 @@
           "CorsConfiguration": {
             "CorsRules": [
               {
-                "AllowedHeaders": [
-                  "*"
-                ],
-                "AllowedMethods": [
-                  "GET",
-                  "PUT",
-                  "POST",
-                  "DELETE"
-                ],
-                "AllowedOrigins": [
-                  "*"
-                ],
+                "AllowedHeaders": ["*"],
+                "AllowedMethods": ["GET", "PUT", "POST", "DELETE"],
+                "AllowedOrigins": ["*"],
                 "MaxAge": 3000
               }
             ]

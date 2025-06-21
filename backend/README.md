@@ -5,6 +5,7 @@ Backend API for Miniature Workshop - A comprehensive tool for documenting and sh
 ## Architecture
 
 Built with AWS serverless architecture using:
+
 - **AWS Lambda** for API endpoints
 - **Amazon DynamoDB** for data storage
 - **Amazon S3** for image storage
@@ -40,6 +41,7 @@ pnpm run deploy
 ```
 
 This will:
+
 1. Bundle TypeScript code
 2. Deploy Lambda functions
 3. Create DynamoDB tables
@@ -49,9 +51,11 @@ This will:
 ## API Endpoints
 
 ### Authentication
+
 - `POST /auth/google` - Authenticate with Google OAuth token
 
 ### Units
+
 - `GET /units` - List all units (public)
 - `POST /units` - Create new unit (authenticated)
 - `GET /units/{id}` - Get unit details
@@ -59,37 +63,44 @@ This will:
 - `DELETE /units/{id}` - Delete unit (authenticated, owner only)
 
 ### Steps
+
 - `GET /units/{unitId}/steps` - List steps for a unit
 - `POST /units/{unitId}/steps` - Add step to unit (authenticated)
 - `PUT /steps/{id}` - Update step (authenticated, owner only)
 - `DELETE /steps/{id}` - Delete step (authenticated, owner only)
 
 ### Images
+
 - `POST /images/upload-url` - Get presigned URL for image upload (authenticated)
 - `GET /images/{id}` - Get image (public)
 
 ### Sync
+
 - `POST /sync` - Sync local data to cloud (authenticated)
 - `GET /sync/since/{timestamp}` - Get changes since timestamp (authenticated)
 
 ## Development
 
 ### Local Development
+
 ```bash
 pnpm run offline
 ```
 
 ### Testing
+
 ```bash
 pnpm test
 ```
 
 ### Linting
+
 ```bash
 pnpm run lint
 ```
 
 ### Building
+
 ```bash
 pnpm run build
 ```
@@ -102,6 +113,7 @@ pnpm run build
 ## Environment Variables
 
 Required environment variables:
+
 - `GOOGLE_CLIENT_ID` - Google OAuth client ID
 - `AWS_ACCESS_KEY_ID` - AWS access key (for deployment)
 - `AWS_SECRET_ACCESS_KEY` - AWS secret key (for deployment)
@@ -109,6 +121,7 @@ Required environment variables:
 ## Database Schema
 
 ### Units Table
+
 - `id` (String, Primary Key)
 - `name` (String)
 - `description` (String)
@@ -119,6 +132,7 @@ Required environment variables:
 - `updatedAt` (String)
 
 ### Steps Table
+
 - `id` (String, Primary Key)
 - `unitId` (String, GSI)
 - `title` (String)
@@ -133,6 +147,7 @@ Required environment variables:
 - `updatedAt` (String)
 
 ### Users Table
+
 - `id` (String, Primary Key)
 - `email` (String, GSI)
 - `name` (String)
@@ -143,6 +158,7 @@ Required environment variables:
 ## Error Handling
 
 The API uses standard HTTP status codes:
+
 - `200` - Success
 - `201` - Created
 - `400` - Bad Request
@@ -162,6 +178,7 @@ The API uses standard HTTP status codes:
 ## Monitoring
 
 AWS CloudWatch automatically monitors:
+
 - Lambda function execution
 - API Gateway requests
 - DynamoDB operations
@@ -179,4 +196,4 @@ AWS CloudWatch automatically monitors:
 1. Create feature branch
 2. Add tests for new functionality
 3. Update documentation
-4. Submit pull request 
+4. Submit pull request

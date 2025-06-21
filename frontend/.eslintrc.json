@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "preact"
-  ],
+  "extends": ["preact"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2020,
@@ -11,9 +9,7 @@
     },
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
+  "plugins": ["@typescript-eslint"],
   "rules": {
     "react/self-closing-comp": "warn",
     "react-hooks/exhaustive-deps": "warn",
@@ -28,4 +24,4 @@
     "es6": true,
     "node": true
   }
-} 
+}

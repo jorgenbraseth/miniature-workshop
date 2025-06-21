@@ -52,11 +52,11 @@ provider:
             - !GetAtt UnitsTable.Arn
             - !GetAtt UsersTable.Arn
             - !GetAtt SyncQueueTable.Arn
-            - !Sub "${UnitsTable.Arn}/index/*"
-            - !Sub "${UsersTable.Arn}/index/EmailIndex"
-            - !Sub "${UsersTable.Arn}/index/EmailIndexV2"
-            - !Sub "${UsersTable.Arn}/index/*"
-            - !Sub "${SyncQueueTable.Arn}/index/*"
+            - !Sub '${UnitsTable.Arn}/index/*'
+            - !Sub '${UsersTable.Arn}/index/EmailIndex'
+            - !Sub '${UsersTable.Arn}/index/EmailIndexV2'
+            - !Sub '${UsersTable.Arn}/index/*'
+            - !Sub '${SyncQueueTable.Arn}/index/*'
         - Effect: Allow
           Action:
             - s3:GetObject
@@ -65,7 +65,7 @@ provider:
             - s3:GetObjectAcl
             - s3:PutObjectAcl
           Resource:
-            - !Sub "${ImagesBucket.Arn}/*"
+            - !Sub '${ImagesBucket.Arn}/*'
         - Effect: Allow
           Action:
             - s3:ListBucket
@@ -77,7 +77,7 @@ provider:
             - logs:CreateLogStream
             - logs:PutLogEvents
           Resource:
-            - !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${self:service}-${self:provider.stage}-*"
+            - !Sub 'arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${self:service}-${self:provider.stage}-*'
 
 package:
   individually: true
@@ -91,7 +91,7 @@ custom:
     bundle: true
     minify: false
     sourcemap: true
-    exclude: 
+    exclude:
       - 'aws-sdk'
     target: 'node20'
     define:
@@ -108,7 +108,7 @@ functions:
       - httpApi:
           path: /auth/verify
           method: post
-  
+
   getCurrentUser:
     handler: src/handlers/auth.getCurrentUser
     timeout: 25
@@ -339,11 +339,11 @@ resources:
   Outputs:
     ApiEndpoint:
       Value:
-        Fn::Sub: "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+        Fn::Sub: 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
       Export:
         Name: ${self:service}-${self:provider.stage}-api-url
-    
+
     HttpApiId:
       Value: !Ref HttpApi
       Export:
-        Name: ${self:service}-${self:provider.stage}-http-api-id 
+        Name: ${self:service}-${self:provider.stage}-http-api-id

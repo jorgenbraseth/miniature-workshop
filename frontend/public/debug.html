@@ -1,55 +1,58 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Debug - Miniature Workshop</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 40px; 
-            background: #f5f5f5;
-            text-align: center;
-        }
-        .redirect-card { 
-            background: white; 
-            padding: 40px; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        .btn {
-            background: #f59e0b;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-        .btn:hover {
-            background: #d97706;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f5f5f5;
+        text-align: center;
+      }
+      .redirect-card {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 500px;
+        margin: 0 auto;
+      }
+      .btn {
+        background: #f59e0b;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 6px;
+        text-decoration: none;
+        display: inline-block;
+        font-weight: bold;
+        margin-top: 20px;
+      }
+      .btn:hover {
+        background: #d97706;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="redirect-card">
-        <h1>🔍 Debug Page Moved</h1>
-        <p>The debug page has been moved to a proper React component that can access environment variables.</p>
-        <a href="/debug" class="btn">Go to Debug Page</a>
-        <p style="margin-top: 20px; font-size: 14px; color: #666;">
-            You will be redirected automatically in 3 seconds...
-        </p>
+      <h1>🔍 Debug Page Moved</h1>
+      <p>
+        The debug page has been moved to a proper React component that can access environment
+        variables.
+      </p>
+      <a href="/debug" class="btn">Go to Debug Page</a>
+      <p style="margin-top: 20px; font-size: 14px; color: #666">
+        You will be redirected automatically in 3 seconds...
+      </p>
     </div>
 
     <script>
-        // Auto-redirect after 3 seconds
-                 setTimeout(() => {
-             window.location.href = '/debug';
-         }, 3000);
-     </script>
- </body>
- </html> 
+      // Auto-redirect after 3 seconds
+      setTimeout(() => {
+        window.location.href = '/debug'
+      }, 3000)
+    </script>
+  </body>
+</html>

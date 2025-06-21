@@ -1,79 +1,79 @@
-import { useState, useEffect } from 'preact/hooks';
-import { authService, AuthState } from '../services/auth';
-import { syncService, SyncStatus } from '../services/sync';
-import { storageService } from '../services/storage';
-import { StorageStats } from '../types';
-import LoginButton from '../components/LoginButton';
-import SyncStatusComponent from '../components/SyncStatus';
+import { useState, useEffect } from 'preact/hooks'
+import { authService, AuthState } from '../services/auth'
+import { syncService, SyncStatus } from '../services/sync'
+import { storageService } from '../services/storage'
+import { StorageStats } from '../types'
+import LoginButton from '../components/LoginButton'
+import SyncStatusComponent from '../components/SyncStatus'
 
 export default function SettingsPage() {
-  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
-  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus());
-  const [storageStats, setStorageStats] = useState<StorageStats | null>(null);
-  const [cleaningUp, setCleaningUp] = useState(false);
-  const [cleanupResult, setCleanupResult] = useState<string | null>(null);
+  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState())
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>(syncService.getSyncStatus())
+  const [storageStats, setStorageStats] = useState<StorageStats | null>(null)
+  const [cleaningUp, setCleaningUp] = useState(false)
+  const [cleanupResult, setCleanupResult] = useState<string | null>(null)
 
   useEffect(() => {
-    const authUnsubscribe = authService.subscribe(setAuthState);
-    const syncUnsubscribe = syncService.subscribe(setSyncStatus);
-    
-    loadStorageStats();
+    const authUnsubscribe = authService.subscribe(setAuthState)
+    const syncUnsubscribe = syncService.subscribe(setSyncStatus)
+
+    loadStorageStats()
 
     return () => {
-      authUnsubscribe();
-      syncUnsubscribe();
-    };
-  }, []);
+      authUnsubscribe()
+      syncUnsubscribe()
+    }
+  }, [])
 
   const loadStorageStats = async () => {
     try {
-      const stats = await storageService.getStorageStats();
-      setStorageStats(stats);
+      const stats = await storageService.getStorageStats()
+      setStorageStats(stats)
     } catch (error) {
-      console.error('Failed to load storage stats:', error);
+      console.error('Failed to load storage stats:', error)
     }
-  };
+  }
 
   const handleForceSync = () => {
-    syncService.forcSync();
-  };
+    syncService.forcSync()
+  }
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-  };
+    if (bytes === 0) return '0 Bytes'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`
+  }
 
   const cleanupLargeImages = async () => {
-    setCleaningUp(true);
-    setCleanupResult(null);
+    setCleaningUp(true)
+    setCleanupResult(null)
     try {
-      const result = await storageService.cleanupLargeImages();
-      setCleanupResult(result);
+      const result = await storageService.cleanupLargeImages()
+      setCleanupResult(result)
     } catch (error) {
-      console.error('Failed to clean up large images:', error);
-      setCleanupResult('Error: Failed to clean up large images');
+      console.error('Failed to clean up large images:', error)
+      setCleanupResult('Error: Failed to clean up large images')
     } finally {
-      setCleaningUp(false);
+      setCleaningUp(false)
     }
-  };
+  }
 
   return (
     <div class="max-w-2xl mx-auto">
       <h1 class="text-3xl font-bold text-gray-900 mb-8">Settings</h1>
-      
+
       {/* Authentication Section */}
       <div class="card mb-6">
         <h2 class="text-xl font-semibold text-workshop-900 mb-4">Account & Authentication</h2>
-        
+
         {authState.isAuthenticated && authState.user ? (
           <div class="space-y-4">
             <div class="flex items-center space-x-3">
               {authState.user.avatar && (
-                <img 
-                  src={authState.user.avatar} 
+                <img
+                  src={authState.user.avatar}
                   alt={authState.user.name}
                   class="w-12 h-12 rounded-full"
                 />
@@ -98,13 +98,13 @@ export default function SettingsPage() {
       {/* Sync Section */}
       <div class="card mb-6">
         <h2 class="text-xl font-semibold text-workshop-900 mb-4">Data Sync</h2>
-        
+
         <div class="space-y-4">
           <div class="flex items-center justify-between">
             <span class="text-workshop-700">Status:</span>
             <SyncStatusComponent />
           </div>
-          
+
           {authState.isAuthenticated && (
             <div class="flex items-center justify-between">
               <span class="text-workshop-700">Manual Sync:</span>
@@ -117,7 +117,7 @@ export default function SettingsPage() {
               </button>
             </div>
           )}
-          
+
           <div class="text-sm text-workshop-600 space-y-1">
             <p>• Data syncs automatically every 30 seconds when online and signed in</p>
             <p>• Your data is stored locally and works offline</p>
@@ -129,7 +129,7 @@ export default function SettingsPage() {
       {/* Storage Section */}
       <div class="card mb-6">
         <h2 class="text-xl font-semibold text-workshop-900 mb-4">Local Storage</h2>
-        
+
         {storageStats ? (
           <div class="space-y-3">
             <div class="grid grid-cols-2 gap-4">
@@ -152,11 +152,8 @@ export default function SettingsPage() {
                 <div class="text-sm text-workshop-600">Storage Used</div>
               </div>
             </div>
-            
-            <button
-              onClick={loadStorageStats}
-              class="btn-secondary text-sm w-full"
-            >
+
+            <button onClick={loadStorageStats} class="btn-secondary text-sm w-full">
               Refresh Stats
             </button>
           </div>
@@ -172,7 +169,9 @@ export default function SettingsPage() {
       <div class="card">
         <h2 class="text-xl font-semibold text-workshop-900 mb-4">About</h2>
         <div class="text-sm text-workshop-600 space-y-2">
-          <p><strong>Miniature Workshop</strong> - Document your painting journey</p>
+          <p>
+            <strong>Miniature Workshop</strong> - Document your painting journey
+          </p>
           <p>Store your miniature painting progress with photos and notes</p>
           <p>Works offline, syncs when online</p>
         </div>
@@ -183,27 +182,25 @@ export default function SettingsPage() {
           <span class="mr-2">🔧</span>
           Data Cleanup
         </h2>
-        
+
         <div class="space-y-4">
           <div>
-            <h3 class="text-sm font-medium text-workshop-700 mb-2">
-              Fix Large Image Data
-            </h3>
+            <h3 class="text-sm font-medium text-workshop-700 mb-2">Fix Large Image Data</h3>
             <p class="text-sm text-workshop-600 mb-3">
-              If you're experiencing sync issues, you might have units with large embedded image data. 
-              This tool will identify and fix units that might be too large for the server.
+              If you're experiencing sync issues, you might have units with large embedded image
+              data. This tool will identify and fix units that might be too large for the server.
             </p>
-            <button
-              onClick={cleanupLargeImages}
-              disabled={cleaningUp}
-              class="btn-secondary"
-            >
+            <button onClick={cleanupLargeImages} disabled={cleaningUp} class="btn-secondary">
               {cleaningUp ? 'Cleaning...' : 'Check & Fix Large Images'}
             </button>
             {cleanupResult && (
-              <div class={`mt-2 p-2 rounded text-sm ${
-                cleanupResult.includes('Error') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'
-              }`}>
+              <div
+                class={`mt-2 p-2 rounded text-sm ${
+                  cleanupResult.includes('Error')
+                    ? 'bg-red-50 text-red-600'
+                    : 'bg-green-50 text-green-600'
+                }`}
+              >
                 {cleanupResult}
               </div>
             )}
@@ -211,5 +208,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  );
-} 
+  )
+}

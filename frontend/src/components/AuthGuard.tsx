@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'preact/hooks';
-import { ComponentChildren } from 'preact';
-import { authService, AuthState } from '../services/auth';
-import LoginButton from './LoginButton';
+import { useState, useEffect } from 'preact/hooks'
+import { ComponentChildren } from 'preact'
+import { authService, AuthState } from '../services/auth'
+import LoginButton from './LoginButton'
 
 interface AuthGuardProps {
-  children: ComponentChildren;
-  fallback?: ComponentChildren;
+  children: ComponentChildren
+  fallback?: ComponentChildren
 }
 
 export default function AuthGuard({ children, fallback }: AuthGuardProps) {
-  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState());
+  const [authState, setAuthState] = useState<AuthState>(authService.getAuthState())
 
   useEffect(() => {
-    const unsubscribe = authService.subscribe(setAuthState);
-    return unsubscribe;
-  }, []);
+    const unsubscribe = authService.subscribe(setAuthState)
+    return unsubscribe
+  }, [])
 
   if (authState.isLoading) {
     return (
@@ -24,12 +24,12 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
           <p class="text-workshop-600">Checking authentication...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!authState.isAuthenticated) {
     if (fallback) {
-      return fallback;
+      return fallback
     }
 
     return (
@@ -45,8 +45,8 @@ export default function AuthGuard({ children, fallback }: AuthGuardProps) {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
-  return children;
-} 
+  return children
+}

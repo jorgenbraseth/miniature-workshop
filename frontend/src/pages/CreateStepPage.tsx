@@ -1,212 +1,219 @@
-import { useEffect, useState } from 'preact/hooks';
-import { route } from 'preact-router';
-import { storageService } from '../services/storage';
-import { authService } from '../services/auth';
-import { Unit, Step } from '../types';
+import { useEffect, useState } from 'preact/hooks'
+import { route } from 'preact-router'
+import { storageService } from '../services/storage'
+import { authService } from '../services/auth'
+import { Unit, Step } from '../types'
 
 export default function CreateStepPage({ unitId }: { unitId: string }) {
-  const [unit, setUnit] = useState<Unit | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [unit, setUnit] = useState<Unit | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Form state
-  const [technique, setTechnique] = useState<string[]>([]);
-  const [description, setDescription] = useState('');
-  const [paintsUsed, setPaintsUsed] = useState('');
-  const [toolsUsed, setToolsUsed] = useState('');
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [showCamera, setShowCamera] = useState(false);
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [technique, setTechnique] = useState<string[]>([])
+  const [description, setDescription] = useState('')
+  const [paintsUsed, setPaintsUsed] = useState('')
+  const [toolsUsed, setToolsUsed] = useState('')
+  const [selectedImages, setSelectedImages] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [showCamera, setShowCamera] = useState(false)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
 
   // Form inputs
-  const [techniqueInput, setTechniqueInput] = useState('');
+  const [techniqueInput, setTechniqueInput] = useState('')
 
   useEffect(() => {
-    loadUnit();
-  }, [unitId]);
+    loadUnit()
+  }, [unitId])
 
   const loadUnit = async () => {
     try {
-      setLoading(true);
-      const unitData = await storageService.getUnit(unitId);
+      setLoading(true)
+      const unitData = await storageService.getUnit(unitId)
       if (unitData) {
-        setUnit(unitData);
+        setUnit(unitData)
       } else {
-        setError('Unit not found');
+        setError('Unit not found')
       }
     } catch (err) {
-      console.error('Failed to load unit:', err);
-      setError('Failed to load unit');
+      console.error('Failed to load unit:', err)
+      setError('Failed to load unit')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const addTechnique = () => {
     if (techniqueInput.trim() && !technique.includes(techniqueInput.trim())) {
-      setTechnique([...technique, techniqueInput.trim()]);
-      setTechniqueInput('');
+      setTechnique([...technique, techniqueInput.trim()])
+      setTechniqueInput('')
     }
-  };
+  }
 
   const removeTechnique = (index: number) => {
-    setTechnique(technique.filter((_, i) => i !== index));
-  };
+    setTechnique(technique.filter((_, i) => i !== index))
+  }
 
   const handleImageUpload = (e: Event) => {
-    const target = e.target as HTMLInputElement;
-    const files = target.files;
-    
+    const target = e.target as HTMLInputElement
+    const files = target.files
+
     if (files) {
-      const newFiles = Array.from(files);
-      const updatedImages = [...selectedImages, ...newFiles];
-      setSelectedImages(updatedImages);
-      
+      const newFiles = Array.from(files)
+      const updatedImages = [...selectedImages, ...newFiles]
+      setSelectedImages(updatedImages)
+
       // Create preview URLs for new images
-      const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-      setImagePreviews([...imagePreviews, ...newPreviews]);
+      const newPreviews = newFiles.map(file => URL.createObjectURL(file))
+      setImagePreviews([...imagePreviews, ...newPreviews])
     }
-  };
+  }
 
   const removeImage = (index: number) => {
     // Revoke the object URL to free memory
-    URL.revokeObjectURL(imagePreviews[index]);
-    
-    setSelectedImages(selectedImages.filter((_, i) => i !== index));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-  };
+    URL.revokeObjectURL(imagePreviews[index])
+
+    setSelectedImages(selectedImages.filter((_, i) => i !== index))
+    setImagePreviews(imagePreviews.filter((_, i) => i !== index))
+  }
 
   const createImageDataUrl = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           facingMode: 'environment', // Use back camera if available
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        } 
-      });
-      setCameraStream(stream);
-      setShowCamera(true);
+          height: { ideal: 1080 },
+        },
+      })
+      setCameraStream(stream)
+      setShowCamera(true)
     } catch (err) {
-      console.error('Error accessing camera:', err);
-      setError('Unable to access camera. Please check permissions or use file upload instead.');
+      console.error('Error accessing camera:', err)
+      setError('Unable to access camera. Please check permissions or use file upload instead.')
     }
-  };
+  }
 
   const stopCamera = () => {
     if (cameraStream) {
-      cameraStream.getTracks().forEach(track => track.stop());
-      setCameraStream(null);
+      cameraStream.getTracks().forEach(track => track.stop())
+      setCameraStream(null)
     }
-    setShowCamera(false);
-  };
+    setShowCamera(false)
+  }
 
   const capturePhoto = () => {
-    const video = document.getElementById('camera-video') as HTMLVideoElement;
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    
+    const video = document.getElementById('camera-video') as HTMLVideoElement
+    const canvas = document.createElement('canvas')
+    const context = canvas.getContext('2d')
+
     if (video && context) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      context.drawImage(video, 0, 0);
-      
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      context.drawImage(video, 0, 0)
+
       // Convert canvas to blob and then to file
-      canvas.toBlob((blob) => {
-        if (blob) {
-          const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' });
-          const updatedImages = [...selectedImages, file];
-          setSelectedImages(updatedImages);
-          
-          // Create preview URL
-          const previewUrl = URL.createObjectURL(file);
-          setImagePreviews([...imagePreviews, previewUrl]);
-          
-          // Close camera after capture
-          stopCamera();
-        }
-      }, 'image/jpeg', 0.8);
+      canvas.toBlob(
+        blob => {
+          if (blob) {
+            const file = new File([blob], `photo-${Date.now()}.jpg`, { type: 'image/jpeg' })
+            const updatedImages = [...selectedImages, file]
+            setSelectedImages(updatedImages)
+
+            // Create preview URL
+            const previewUrl = URL.createObjectURL(file)
+            setImagePreviews([...imagePreviews, previewUrl])
+
+            // Close camera after capture
+            stopCamera()
+          }
+        },
+        'image/jpeg',
+        0.8
+      )
     }
-  };
+  }
 
   // Update video element when camera stream changes
   useEffect(() => {
     if (cameraStream && showCamera) {
-      const video = document.getElementById('camera-video') as HTMLVideoElement;
+      const video = document.getElementById('camera-video') as HTMLVideoElement
       if (video) {
-        video.srcObject = cameraStream;
+        video.srcObject = cameraStream
       }
     }
-  }, [cameraStream, showCamera]);
+  }, [cameraStream, showCamera])
 
   // Cleanup camera stream on unmount
   useEffect(() => {
     return () => {
       if (cameraStream) {
-        cameraStream.getTracks().forEach(track => track.stop());
+        cameraStream.getTracks().forEach(track => track.stop())
       }
-    };
-  }, [cameraStream]);
+    }
+  }, [cameraStream])
 
   const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    
+    e.preventDefault()
+
     // Collect all techniques (both added ones and current input)
-    const allTechniques = [...technique];
+    const allTechniques = [...technique]
     if (techniqueInput.trim() && !allTechniques.includes(techniqueInput.trim())) {
-      allTechniques.push(techniqueInput.trim());
+      allTechniques.push(techniqueInput.trim())
     }
 
     if (!unit || !description.trim()) {
-      setError('Please enter a description for this step');
-      return;
+      setError('Please enter a description for this step')
+      return
     }
 
     try {
-      setSaving(true);
-      setError(null);
+      setSaving(true)
+      setError(null)
 
       // Upload images to S3 and create Photo objects with S3 URLs
       const photos = await Promise.all(
         selectedImages.map(async (file, index) => {
           try {
             // Get upload URL from backend
-            const authState = authService.getAuthState();
+            const authState = authService.getAuthState()
             if (!authState.isAuthenticated || !authState.token) {
-              throw new Error('Not authenticated');
+              throw new Error('Not authenticated')
             }
 
-            const uploadResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/images/upload-url`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${authState.token}`,
-              },
-              body: JSON.stringify({
-                type: 'detail',
-                description: `Step ${unit.steps.length + 1} - Image ${index + 1}`,
-                isPublic: false,
-              }),
-            });
+            const uploadResponse = await fetch(
+              `${import.meta.env.VITE_API_BASE_URL}/images/upload-url`,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${authState.token}`,
+                },
+                body: JSON.stringify({
+                  type: 'detail',
+                  description: `Step ${unit.steps.length + 1} - Image ${index + 1}`,
+                  isPublic: false,
+                }),
+              }
+            )
 
             if (!uploadResponse.ok) {
-              throw new Error(`Failed to get upload URL: ${uploadResponse.status}`);
+              throw new Error(`Failed to get upload URL: ${uploadResponse.status}`)
             }
 
-            const uploadData = await uploadResponse.json();
+            const uploadData = await uploadResponse.json()
             if (!uploadData.success) {
-              throw new Error(uploadData.error || 'Failed to get upload URL');
+              throw new Error(uploadData.error || 'Failed to get upload URL')
             }
 
             // Upload image to S3
@@ -216,28 +223,31 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
               headers: {
                 'Content-Type': 'image/jpeg',
               },
-            });
+            })
 
             if (!s3Response.ok) {
-              throw new Error(`Failed to upload image: ${s3Response.status}`);
+              throw new Error(`Failed to upload image: ${s3Response.status}`)
             }
 
             // Store local copy in OPFS for offline access
-            let localPath = '';
+            let localPath = ''
             try {
-              await storageService.savePhoto({
-                id: uploadData.data.imageId,
-                opfsPath: `images/${uploadData.data.imageId}.jpg`,
-                thumbnailPath: `thumbnails/${uploadData.data.imageId}.jpg`,
-                type: 'detail',
-                description: `Step ${unit.steps.length + 1} - Image ${index + 1}`,
-                timestamp: new Date()
-              }, file);
-              localPath = `images/${uploadData.data.imageId}.jpg`;
+              await storageService.savePhoto(
+                {
+                  id: uploadData.data.imageId,
+                  opfsPath: `images/${uploadData.data.imageId}.jpg`,
+                  thumbnailPath: `thumbnails/${uploadData.data.imageId}.jpg`,
+                  type: 'detail',
+                  description: `Step ${unit.steps.length + 1} - Image ${index + 1}`,
+                  timestamp: new Date(),
+                },
+                file
+              )
+              localPath = `images/${uploadData.data.imageId}.jpg`
             } catch (opfsError) {
-              console.warn('Failed to save to OPFS, using S3 URL only:', opfsError);
-                             // Construct S3 URL as fallback
-               localPath = `https://${import.meta.env.VITE_IMAGES_BUCKET}.s3.eu-west-1.amazonaws.com/${uploadData.data.s3Key}`;
+              console.warn('Failed to save to OPFS, using S3 URL only:', opfsError)
+              // Construct S3 URL as fallback
+              localPath = `https://${import.meta.env.VITE_IMAGES_BUCKET}.s3.eu-west-1.amazonaws.com/${uploadData.data.s3Key}`
             }
 
             return {
@@ -248,11 +258,11 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
               description: `Step ${unit.steps.length + 1} - Image ${index + 1}`,
               timestamp: new Date(),
               s3Key: uploadData.data.s3Key, // Store S3 key for sync
-            };
+            }
           } catch (uploadError) {
-            console.error('Failed to upload image:', uploadError);
+            console.error('Failed to upload image:', uploadError)
             // Fallback to data URL for offline use (temporary)
-            const dataUrl = await createImageDataUrl(file);
+            const dataUrl = await createImageDataUrl(file)
             return {
               id: `temp-${Date.now()}-${index}`,
               opfsPath: dataUrl,
@@ -260,10 +270,10 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
               type: 'detail' as const,
               description: `Step ${unit.steps.length + 1} - Image ${index + 1} (offline)`,
               timestamp: new Date(),
-            };
+            }
           }
         })
-      );
+      )
 
       const newStep: Step = {
         id: `step-${Date.now()}`,
@@ -275,36 +285,36 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
         brushes: [], // Will be parsed from toolsUsed text later if needed
         otherTools: [], // Will be parsed from toolsUsed text later if needed
         photos,
-        appliedToModels: [] // Simplified - no longer tracking per-model application
-      };
+        appliedToModels: [], // Simplified - no longer tracking per-model application
+      }
 
       const updatedUnit: Unit = {
         ...unit,
         steps: [...unit.steps, newStep],
-        updatedAt: new Date()
-      };
+        updatedAt: new Date(),
+      }
 
-      await storageService.saveUnit(updatedUnit);
-      
+      await storageService.saveUnit(updatedUnit)
+
       // Clean up object URLs
-      imagePreviews.forEach(url => URL.revokeObjectURL(url));
-      
+      imagePreviews.forEach(url => URL.revokeObjectURL(url))
+
       // Navigate back to unit detail page
-      route(`/units/${unitId}`);
+      route(`/units/${unitId}`)
     } catch (err) {
-      console.error('Failed to save step:', err);
-      setError('Failed to save step. Please try again.');
+      console.error('Failed to save step:', err)
+      setError('Failed to save step. Please try again.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   if (loading) {
     return (
       <div class="flex justify-center items-center min-h-64">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-paint-600" />
       </div>
-    );
+    )
   }
 
   if (error && !unit) {
@@ -313,27 +323,29 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
         <div class="card text-center">
           <h1 class="text-2xl font-bold text-red-600 mb-4">Error</h1>
           <p class="text-gray-600 mb-4">{error}</p>
-          <button 
-            onClick={() => route('/units')} 
-            class="btn-primary"
-          >
+          <button onClick={() => route('/units')} class="btn-primary">
             Back to Units
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div class="max-w-4xl mx-auto">
       {/* Header */}
       <div class="mb-8">
-        <button 
-          onClick={() => route(`/units/${unitId}`)} 
+        <button
+          onClick={() => route(`/units/${unitId}`)}
           class="text-paint-600 hover:text-paint-800 mb-2 flex items-center"
         >
           <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
           Back to {unit?.name}
         </button>
@@ -351,12 +363,10 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
             <span class="mr-2">📸</span>
             Step Photos
           </h2>
-          
+
           <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Add Images
-            </label>
-            
+            <label class="block text-sm font-medium text-workshop-700 mb-2">Add Images</label>
+
             {/* Camera Modal */}
             {showCamera && (
               <div class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
@@ -369,7 +379,12 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                       class="text-gray-500 hover:text-gray-700"
                     >
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -387,8 +402,18 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                         class="bg-white text-workshop-900 rounded-full p-4 shadow-lg hover:bg-gray-100 transition-colors"
                       >
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                          />
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -396,7 +421,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                 </div>
               </div>
             )}
-            
+
             {/* Upload Options */}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               {/* Camera Capture */}
@@ -406,15 +431,30 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                 class="border-2 border-dashed border-workshop-300 rounded-lg p-6 text-center hover:border-workshop-400 transition-colors bg-workshop-50 hover:bg-workshop-100"
               >
                 <div class="flex flex-col items-center">
-                  <svg class="w-12 h-12 text-workshop-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <svg
+                    class="w-12 h-12 text-workshop-500 mb-2"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
                   </svg>
                   <p class="text-workshop-600 font-medium">Take Photo</p>
                   <p class="text-workshop-500 text-sm">Use device camera</p>
                 </div>
               </button>
-              
+
               {/* File Upload */}
               <div class="border-2 border-dashed border-workshop-300 rounded-lg p-6 text-center hover:border-workshop-400 transition-colors">
                 <input
@@ -427,8 +467,18 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                 />
                 <label for="image-upload" class="cursor-pointer">
                   <div class="flex flex-col items-center">
-                    <svg class="w-12 h-12 text-workshop-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    <svg
+                      class="w-12 h-12 text-workshop-400 mb-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
                     </svg>
                     <p class="text-workshop-600 font-medium">Upload Files</p>
                     <p class="text-workshop-500 text-sm">Choose from gallery</p>
@@ -436,7 +486,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                 </label>
               </div>
             </div>
-            
+
             {/* Image Previews */}
             {selectedImages.length > 0 && (
               <div class="mt-4">
@@ -466,9 +516,10 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
                 </div>
               </div>
             )}
-            
+
             <p class="text-sm text-workshop-500 mt-2">
-              Add photos to document this painting step. Use the camera for real-time capture or upload existing files.
+              Add photos to document this painting step. Use the camera for real-time capture or
+              upload existing files.
             </p>
           </div>
         </div>
@@ -479,15 +530,13 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
             <span class="mr-2">📝</span>
             Step Details
           </h2>
-          
+
           {/* Description */}
           <div class="mb-6">
-            <label class="block text-sm font-medium text-workshop-700 mb-2">
-              Description *
-            </label>
+            <label class="block text-sm font-medium text-workshop-700 mb-2">Description *</label>
             <textarea
               value={description}
-              onInput={(e) => setDescription((e.target as HTMLTextAreaElement).value)}
+              onInput={e => setDescription((e.target as HTMLTextAreaElement).value)}
               placeholder="Describe what you did in this step..."
               rows={3}
               class="textarea-field"
@@ -502,7 +551,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
             </label>
             <textarea
               value={paintsUsed}
-              onInput={(e) => setPaintsUsed((e.target as HTMLTextAreaElement).value)}
+              onInput={e => setPaintsUsed((e.target as HTMLTextAreaElement).value)}
               placeholder="e.g., Citadel Abaddon Black, Vallejo Model Color White, Army Painter Dragon Red..."
               rows={2}
               class="textarea-field"
@@ -517,7 +566,7 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
             </label>
             <textarea
               value={toolsUsed}
-              onInput={(e) => setToolsUsed((e.target as HTMLTextAreaElement).value)}
+              onInput={e => setToolsUsed((e.target as HTMLTextAreaElement).value)}
               placeholder="e.g., Round brush size 2, Flat brush size 6, Sponge, Cotton swabs..."
               rows={2}
               class="textarea-field"
@@ -533,25 +582,25 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
               <input
                 type="text"
                 value={techniqueInput}
-                onInput={(e) => setTechniqueInput((e.target as HTMLInputElement).value)}
+                onInput={e => setTechniqueInput((e.target as HTMLInputElement).value)}
                 placeholder="e.g., Base coating, Layering, Drybrushing"
                 class="input-field flex-1"
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTechnique())}
+                onKeyPress={e => e.key === 'Enter' && (e.preventDefault(), addTechnique())}
               />
-              <button
-                type="button"
-                onClick={addTechnique}
-                class="btn-secondary"
-              >
+              <button type="button" onClick={addTechnique} class="btn-secondary">
                 Add More
               </button>
             </div>
             <p class="text-sm text-workshop-500 mb-2">
-              Enter your main technique above. Click "Add More" to include additional techniques (optional).
+              Enter your main technique above. Click "Add More" to include additional techniques
+              (optional).
             </p>
             <div class="flex flex-wrap gap-2">
               {technique.map((tech, index) => (
-                <span key={index} class="inline-flex items-center px-3 py-1 bg-paint-100 text-paint-800 rounded-full text-sm">
+                <span
+                  key={index}
+                  class="inline-flex items-center px-3 py-1 bg-paint-100 text-paint-800 rounded-full text-sm"
+                >
                   {tech}
                   <button
                     type="button"
@@ -583,15 +632,11 @@ export default function CreateStepPage({ unitId }: { unitId: string }) {
           >
             Cancel
           </button>
-          <button
-            type="submit"
-            class="btn-primary"
-            disabled={saving || !description.trim()}
-          >
+          <button type="submit" class="btn-primary" disabled={saving || !description.trim()}>
             {saving ? 'Saving...' : 'Save Step'}
           </button>
         </div>
       </form>
     </div>
-  );
-} 
+  )
+}

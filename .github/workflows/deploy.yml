@@ -86,6 +86,11 @@ jobs:
         working-directory: ./backend
         run: pnpm install --frozen-lockfile
 
+      - name: Check frontend formatting
+        if: needs.changes.outputs.frontend == 'true'
+        working-directory: ./frontend
+        run: pnpm run format:check
+
       - name: Lint frontend
         if: needs.changes.outputs.frontend == 'true'
         working-directory: ./frontend
@@ -95,6 +100,16 @@ jobs:
         if: needs.changes.outputs.frontend == 'true'
         working-directory: ./frontend
         run: pnpm run build
+
+      - name: Check backend formatting
+        if: needs.changes.outputs.backend == 'true'
+        working-directory: ./backend
+        run: pnpm run format:check
+
+      - name: Lint backend
+        if: needs.changes.outputs.backend == 'true'
+        working-directory: ./backend
+        run: pnpm run lint
 
       - name: Test backend
         if: needs.changes.outputs.backend == 'true'

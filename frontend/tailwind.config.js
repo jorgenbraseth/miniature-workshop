@@ -1,9 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -46,36 +43,34 @@ export default {
           800: '#744c2f',
           900: '#5d3a1f',
         },
-                 // Keep some standard colors for consistency
-         success: {
-           100: '#dcfce7',
-           500: '#10b981',
-           600: '#059669',
-           800: '#166534',
-         },
-         warning: {
-           100: '#fef3c7',
-           500: '#f59e0b',
-           600: '#d97706',
-           800: '#92400e',
-         },
-         error: {
-           100: '#fee2e2',
-           500: '#ef4444',
-           600: '#dc2626',
-           800: '#991b1b',
-         }
+        // Keep some standard colors for consistency
+        success: {
+          100: '#dcfce7',
+          500: '#10b981',
+          600: '#059669',
+          800: '#166534',
+        },
+        warning: {
+          100: '#fef3c7',
+          500: '#f59e0b',
+          600: '#d97706',
+          800: '#92400e',
+        },
+        error: {
+          100: '#fee2e2',
+          500: '#ef4444',
+          600: '#dc2626',
+          800: '#991b1b',
+        },
       },
       fontFamily: {
-        'workshop': ['Inter', 'system-ui', 'sans-serif'],
+        workshop: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        'paint': '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)',
-        'workshop': '0 4px 6px -1px rgba(72, 101, 129, 0.1), 0 2px 4px -1px rgba(72, 101, 129, 0.06)',
-      }
+        paint: '0 4px 6px -1px rgba(245, 158, 11, 0.1), 0 2px 4px -1px rgba(245, 158, 11, 0.06)',
+        workshop: '0 4px 6px -1px rgba(72, 101, 129, 0.1), 0 2px 4px -1px rgba(72, 101, 129, 0.06)',
+      },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
-} 
+  plugins: [require('@tailwindcss/typography')],
+}

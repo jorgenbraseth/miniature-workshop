@@ -8,6 +8,8 @@
     "deploy": "serverless deploy --stage prod",
     "test": "jest --passWithNoTests",
     "lint": "eslint src/**/*.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "offline": "serverless offline"
   },
   "dependencies": {
@@ -17,19 +19,20 @@
     "@aws-sdk/s3-request-presigner": "^3.470.0",
     "aws-lambda": "^1.0.7",
     "google-auth-library": "^9.4.0",
-    "uuid": "^9.0.1",
+    "joi": "^17.11.0",
     "sharp": "^0.33.0",
-    "joi": "^17.11.0"
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.131",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.0",
     "@types/uuid": "^9.0.7",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.54.0",
     "jest": "^29.7.0",
+    "prettier": "^3.5.3",
     "serverless": "^3.38.0",
     "serverless-esbuild": "^1.50.0",
     "serverless-offline": "^13.3.0",
@@ -47,4 +50,4 @@
   "author": "Miniature Workshop Team",
   "license": "MIT",
   "packageManager": "pnpm@9.15.0+sha512.76e2379760a4328ec4415815bcd6628dee727af3779aaa4c914e3944156c4299921a89f976381ee107d41f12cfa4b66681ca9c718f0668fa0831ed4c6d8ba56c"
-} 
+}

@@ -1,5 +1,5 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
-import { ApiResponse } from '../types';
+import { APIGatewayProxyResult } from 'aws-lambda'
+import { ApiResponse } from '../types'
 
 export const createResponse = <T = any>(
   statusCode: number,
@@ -16,8 +16,8 @@ export const createResponse = <T = any>(
       ...headers,
     },
     body: JSON.stringify(body),
-  };
-};
+  }
+}
 
 export const successResponse = <T = any>(
   data: T,
@@ -28,8 +28,8 @@ export const successResponse = <T = any>(
     success: true,
     data,
     message,
-  });
-};
+  })
+}
 
 export const errorResponse = (
   error: string,
@@ -40,8 +40,8 @@ export const errorResponse = (
     success: false,
     error,
     message,
-  });
-};
+  })
+}
 
 export const serverErrorResponse = (
   error: string = 'Internal server error'
@@ -49,33 +49,27 @@ export const serverErrorResponse = (
   return createResponse(500, {
     success: false,
     error,
-  });
-};
+  })
+}
 
-export const notFoundResponse = (
-  resource: string = 'Resource'
-): APIGatewayProxyResult => {
+export const notFoundResponse = (resource: string = 'Resource'): APIGatewayProxyResult => {
   return createResponse(404, {
     success: false,
     error: `${resource} not found`,
-  });
-};
+  })
+}
 
-export const unauthorizedResponse = (
-  message: string = 'Unauthorized'
-): APIGatewayProxyResult => {
+export const unauthorizedResponse = (message: string = 'Unauthorized'): APIGatewayProxyResult => {
   return createResponse(401, {
     success: false,
     error: message,
-  });
-};
+  })
+}
 
-export const validationErrorResponse = (
-  errors: string[]
-): APIGatewayProxyResult => {
+export const validationErrorResponse = (errors: string[]): APIGatewayProxyResult => {
   return createResponse(400, {
     success: false,
     error: 'Validation failed',
     message: errors.join(', '),
-  });
-}; 
+  })
+}
